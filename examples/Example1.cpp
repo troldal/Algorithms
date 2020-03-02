@@ -7,13 +7,14 @@
 #include <string>
 #include <troldalgo.hpp>
 
+using namespace std::string_literals;
+
 int main() {
 
-    //std::string str("1234DIV1234DIVDIV1234DIV1234DIV5DIV");
-    std::string str("12345123451234512345123");
+    std::string str("1234DIV1234DIVDIV1234DIV1234DIV5DIV");
+    //std::string str("12345123451234512345");
     std::vector<std::string> vec;
-
-    trl::split(str, std::back_inserter(vec), trl::ByLength(5));
+    trl::split(str, std::back_inserter(vec), trl::BySequence("DIV"s));
 
     for (auto& word : vec)
         std::cout << word << std::endl;

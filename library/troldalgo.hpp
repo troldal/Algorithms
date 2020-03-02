@@ -100,6 +100,45 @@ namespace trl
     }
 
     /**
+     * @brief Finds all elements of a given value in a container, in the range [first, last), using a execution policy.
+     * @details This algorithm is a wrapper around the std::find algorithm. It simply calls std::find on the provided
+     * container, until all elements have been found, or until the last element has been reached.
+     * #### Example
+     * The following example will find all occurrences of the letter 'A' in a given string. It will find four items at
+     * position 0, 7, 8 and 15. Iterators to those elements will be copied to the results vector.
+     *   @code{.cpp}
+     *      auto str = std::string("ABCDDCBAABCDDCBAX");
+     *      std::vector<decltype(str.begin())> results;
+            trl::find_all(std::par, str.begin(),str.end(), std::back_inserter(results), 'A');
+     *   @endcode
+     * @tparam ExecutionPolicy The execution policy to use. This has to be one of the policies defined in the standard library.
+     * @tparam InputIt The type of the input iterator parameters. InputIt will be auto-deducted by the compiler.
+     * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
+     * @tparam T The type of the value to find. T will be auto-deducted by the compiler.
+     * @param first The first element in the range to examine.
+     * @param last One element beyond the last element in the range to examine.
+     * @param d_first An output iterator pointing to the first element to fill in the output container.
+     * @param value The value to find.
+     * @return An output iterator pointing to one element beyond the last element of the output container.
+     * @throws Undefined find_all itself does not throw. However, std::find is not marked noexcept, so it might throw,
+     * but documentation does not reveal any details.
+     */
+    template<typename ExecutionPolicy, typename InputIt, typename OutputIt, typename T>
+    OutputIt find_all(ExecutionPolicy&& policy,
+                  InputIt first,
+                  InputIt last,
+                  OutputIt d_first,
+                  const T& value ) {
+        while (first != last) {
+            first = std::find(policy, first, last, value);
+            if (first != last)
+                *(d_first++) = first++;
+        }
+
+        return d_first;
+    }
+
+    /**
      * @brief Finds all elements that satisfies a certain criteria (using a predicate) in the range [first, last) of a container.
      * @details This algorithm is a wrapper around the std::find_if algorithm. It simply calls std::find_if on the provided
      * container, until all elements have been found, or until the last element has been reached.
@@ -129,6 +168,34 @@ namespace trl
                          UnaryPredicate p) {
         while (first != last) {
             first = std::find_if(first, last, p);
+            if (first != last)
+                *(d_first++) = first++;
+        }
+
+        return d_first;
+    }
+
+    /**
+     * @brief
+     * @tparam ExecutionPolicy
+     * @tparam InputIt
+     * @tparam OutputIt
+     * @tparam UnaryPredicate
+     * @param policy
+     * @param first
+     * @param last
+     * @param d_first
+     * @param p
+     * @return
+     */
+    template<typename ExecutionPolicy, typename InputIt, typename OutputIt, typename UnaryPredicate>
+    OutputIt find_all_if(ExecutionPolicy&& policy,
+                     InputIt first,
+                     InputIt last,
+                     OutputIt d_first,
+                     UnaryPredicate p) {
+        while (first != last) {
+            first = std::find_if(policy, first, last, p);
             if (first != last)
                 *(d_first++) = first++;
         }
@@ -175,6 +242,34 @@ namespace trl
 
     /**
      * @brief
+     * @tparam ExecutionPolicy
+     * @tparam InputIt
+     * @tparam OutputIt
+     * @tparam UnaryPredicate
+     * @param policy
+     * @param first
+     * @param last
+     * @param d_first
+     * @param p
+     * @return
+     */
+    template<typename ExecutionPolicy, typename InputIt, typename OutputIt, typename UnaryPredicate>
+    OutputIt find_all_if_not(ExecutionPolicy&& policy,
+                         InputIt first,
+                         InputIt last,
+                         OutputIt d_first,
+                         UnaryPredicate p) {
+        while (first != last) {
+            first = std::find_if_not(policy, first, last, p);
+            if (first != last)
+                *(d_first++) = first++;
+        }
+
+        return d_first;
+    }
+
+    /**
+     * @brief
      * @tparam ForwardIt1
      * @tparam ForwardIt2
      * @param first
@@ -197,6 +292,76 @@ namespace trl
 
     /**
      * @brief
+     * @tparam ExecutionPolicy
+     * @tparam ForwardIt1
+     * @tparam ForwardIt2
+     * @param policy
+     * @param first
+     * @param last
+     * @param s_first
+     * @param s_last
+     * @return
+     */
+    template<typename ExecutionPolicy, typename ForwardIt1, typename ForwardIt2>
+    ForwardIt1 find_first_not_of(ExecutionPolicy&& policy,
+                                 ForwardIt1 first,
+                                 ForwardIt1 last,
+                                 ForwardIt2 s_first,
+                                 ForwardIt2 s_last ) {
+        return std::find_first_of(policy, first, last, s_first, s_last,
+                                  [](const decltype(*first)& a,
+                                     const decltype(*s_first)& b) {
+                                      return a != b;
+                                  });
+    }
+
+    /**
+     * @brief
+     * @tparam InputIt
+     * @tparam ForwardIt
+     * @tparam BinaryPredicate
+     * @param first
+     * @param last
+     * @param s_first
+     * @param s_last
+     * @param p
+     * @return
+     */
+    template<typename InputIt, typename ForwardIt, typename BinaryPredicate>
+    constexpr InputIt find_first_not_of(InputIt first,
+                                        InputIt last,
+                                        ForwardIt s_first,
+                                        ForwardIt s_last,
+                                        BinaryPredicate p) {
+        return std::find_first_of(first, last, s_first, s_last, !p);
+    }
+
+    /**
+     * @brief
+     * @tparam ExecutionPolicy
+     * @tparam ForwardIt1
+     * @tparam ForwardIt2
+     * @tparam BinaryPredicate
+     * @param policy
+     * @param first
+     * @param last
+     * @param s_first
+     * @param s_last
+     * @param p
+     * @return
+     */
+    template<typename ExecutionPolicy, typename ForwardIt1, typename ForwardIt2, typename BinaryPredicate>
+    ForwardIt1 find_first_not_of(ExecutionPolicy&& policy,
+                                 ForwardIt1 first,
+                                 ForwardIt1 last,
+                                 ForwardIt2 s_first,
+                                 ForwardIt2 s_last,
+                                 BinaryPredicate p ) {
+        return std::find_first_of(policy, first, last, s_first, s_last, !p);
+    }
+
+    /**
+     * @brief
      * @tparam ForwardIt1
      * @tparam ForwardIt2
      * @tparam OutputIt
@@ -215,6 +380,105 @@ namespace trl
                          OutputIt d_first) {
         while (first != last) {
             first = std::find_first_of(first, last, s_first, s_last);
+            if (first != last) {
+                *(d_first++) = first;
+                first++;
+            }
+        }
+
+        return d_first;
+    }
+
+    /**
+     * @brief
+     * @tparam ExecutionPolicy
+     * @tparam ForwardIt1
+     * @tparam ForwardIt2
+     * @tparam OutputIt
+     * @param policy
+     * @param first
+     * @param last
+     * @param s_first
+     * @param s_last
+     * @param d_first
+     * @return
+     */
+    template<typename ExecutionPolicy, typename ForwardIt1, typename ForwardIt2, typename OutputIt>
+    OutputIt find_all_of(ExecutionPolicy&& policy,
+                         ForwardIt1 first,
+                         ForwardIt1 last,
+                         ForwardIt2 s_first,
+                         ForwardIt2 s_last,
+                         OutputIt d_first) {
+        while (first != last) {
+            first = std::find_first_of(policy, first, last, s_first, s_last);
+            if (first != last) {
+                *(d_first++) = first;
+                first++;
+            }
+        }
+
+        return d_first;
+    }
+
+    /**
+     * @brief
+     * @tparam ForwardIt1
+     * @tparam ForwardIt2
+     * @tparam OutputIt
+     * @tparam BinaryPredicate
+     * @param first
+     * @param last
+     * @param s_first
+     * @param s_last
+     * @param d_first
+     * @param p
+     * @return
+     */
+    template<typename ForwardIt1, typename ForwardIt2, typename OutputIt, typename BinaryPredicate>
+    OutputIt find_all_of(ForwardIt1 first,
+                         ForwardIt1 last,
+                         ForwardIt2 s_first,
+                         ForwardIt2 s_last,
+                         OutputIt d_first,
+                         BinaryPredicate p) {
+        while (first != last) {
+            first = std::find_first_of(first, last, s_first, s_last, p);
+            if (first != last) {
+                *(d_first++) = first;
+                first++;
+            }
+        }
+
+        return d_first;
+    }
+
+    /**
+     * @brief
+     * @tparam ExecutionPolicy
+     * @tparam ForwardIt1
+     * @tparam ForwardIt2
+     * @tparam OutputIt
+     * @tparam BinaryPredicate
+     * @param policy
+     * @param first
+     * @param last
+     * @param s_first
+     * @param s_last
+     * @param d_first
+     * @param p
+     * @return
+     */
+    template<typename ExecutionPolicy, typename ForwardIt1, typename ForwardIt2, typename OutputIt, typename BinaryPredicate>
+    OutputIt find_all_of(ExecutionPolicy policy,
+                         ForwardIt1 first,
+                         ForwardIt1 last,
+                         ForwardIt2 s_first,
+                         ForwardIt2 s_last,
+                         OutputIt d_first,
+                         BinaryPredicate p) {
+        while (first != last) {
+            first = std::find_first_of(policy, first, last, s_first, s_last, p);
             if (first != last) {
                 *(d_first++) = first;
                 first++;
@@ -341,11 +605,7 @@ namespace trl
         template<typename RandomAccessIter>
         auto Find(RandomAccessIter begin,
                   RandomAccessIter end) {
-//            auto nextSep = std::find(begin, end, m_element);
-//            if (nextSep == end)
-//                return std::pair(end, end);
-//            else
-//                return std::pair(nextSep, nextSep + 1);
+
             std::vector<RandomAccessIter> locations;
             find_all(begin, end, std::back_inserter(locations), m_element);
             return locations;
@@ -387,11 +647,7 @@ namespace trl
         template<typename RandomAccessIter>
         auto Find(RandomAccessIter begin,
                   RandomAccessIter end) {
-//            auto nextSep = std::search(begin, end, m_sequence.begin(), m_sequence.end());
-//            if (nextSep == end)
-//                return std::pair(end, end);
-//            else
-//                return std::pair(nextSep, nextSep + m_sequence.size());
+
             std::vector<RandomAccessIter> locations;
             search_all(begin, end, m_sequence.begin(), m_sequence.end(), std::back_inserter(locations));
             return locations;
@@ -421,11 +677,7 @@ namespace trl
         template<typename RandomAccessIter>
         auto Find(RandomAccessIter begin,
                   RandomAccessIter end) {
-//            auto nextSep = std::find_first_of(begin, end, m_sequence.begin(), m_sequence.end());
-//            if (nextSep == end)
-//                return std::pair(end, end);
-//            else
-//                return std::pair(nextSep, nextSep + 1);
+
             std::vector<RandomAccessIter> locations;
             find_all_of(begin, end, m_sequence.begin(), m_sequence.end(), std::back_inserter(locations));
             return locations;
@@ -462,16 +714,14 @@ namespace trl
         template<typename RandomAccessIter>
         auto Find(RandomAccessIter begin,
                   RandomAccessIter end) {
-//            auto nextSep = (std::distance(begin, end) >= 4 ? begin + 4 : end);
-//            if (nextSep == end)
-//                return std::pair(end, end);
-//            else
-//                return std::pair(nextSep, nextSep);
+
             std::vector<RandomAccessIter> locations;
             while (std::distance(begin, end) > m_length) {
-                locations.emplace_back(begin);
                 begin += m_length;
+                locations.emplace_back(begin);
             }
+
+            if (begin != end) locations.emplace_back(end);
             return locations;
         }
 

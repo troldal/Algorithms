@@ -6,6 +6,86 @@
 #include <array>
 #include <set>
 #include <unordered_set>
+#include <type_traits>
+
+template<typename T>
+struct CaseDef
+{
+    std::string      case_title;
+    std::vector<T>   array;
+    T                search_item;
+    std::vector<int> item_locations;
+};
+
+template<typename T>
+void fill_char(T& target, const std::vector<char>& source) {
+
+    if constexpr (std::is_same<T, std::multiset<char>>::value){
+        for (auto c : source) target.insert(c);
+    }
+    else if constexpr (std::is_same<T, std::unordered_multiset<char>>::value){
+        for (auto c : source) target.insert(c);
+    }
+    else {
+        std::copy(source.begin(), source.end(), std::back_inserter(target));
+    }
+}
+
+auto create_find_all_cases() {
+
+    CaseDef<char> CaseDef1;
+    CaseDef1.case_title = "Find all 'A's in the container";
+    CaseDef1.array = {'A','B','C','D','D','C','B','A','A','B','C','D','D','C','B','A','X'};
+    CaseDef1.search_item = 'A';
+    CaseDef1.item_locations = {0, 7, 8, 15};
+
+    CaseDef<char> CaseDef2;
+    CaseDef2.case_title = "Find all 'B's in the container";
+    CaseDef2.array = {'A','B','C','D','D','C','B','A','A','B','C','D','D','C','B','A','X'};
+    CaseDef2.search_item = 'B';
+    CaseDef2.item_locations = {1, 6, 9, 14};
+
+    CaseDef<char> CaseDef3;
+    CaseDef3.case_title = "Find all 'C's in the container";
+    CaseDef3.array = {'A','B','C','D','D','C','B','A','A','B','C','D','D','C','B','A','X'};
+    CaseDef3.search_item = 'C';
+    CaseDef3.item_locations = {2, 5, 10, 13};
+
+    CaseDef<char> CaseDef4;
+    CaseDef4.case_title = "Find all 'D's in the container";
+    CaseDef4.array = {'A','B','C','D','D','C','B','A','A','B','C','D','D','C','B','A','X'};
+    CaseDef4.search_item = 'D';
+    CaseDef4.item_locations = {3, 4, 11, 12};
+
+    CaseDef<char> CaseDef5;
+    CaseDef5.case_title = "Find all 'X's in the container";
+    CaseDef5.array = {'A','B','C','D','D','C','B','A','A','B','C','D','D','C','B','A','X'};
+    CaseDef5.search_item = 'X';
+    CaseDef5.item_locations = {16};
+
+    CaseDef<char> CaseDef6;
+    CaseDef6.case_title = "Find all 'Z's in the container";
+    CaseDef6.array = {'A','B','C','D','D','C','B','A','A','B','C','D','D','C','B','A','X'};
+    CaseDef6.search_item = 'Z';
+    CaseDef6.item_locations = {};
+
+    CaseDef<char> CaseDef7;
+    CaseDef7.case_title = "Find all 'Z's in an empty container";
+    CaseDef7.array = {};
+    CaseDef7.search_item = 'Z';
+    CaseDef7.item_locations = {};
+
+    std::vector<CaseDef<char>> cases;
+    cases.emplace_back(CaseDef1);
+    cases.emplace_back(CaseDef2);
+    cases.emplace_back(CaseDef3);
+    cases.emplace_back(CaseDef4);
+    cases.emplace_back(CaseDef5);
+    cases.emplace_back(CaseDef6);
+    cases.emplace_back(CaseDef7);
+
+    return cases;
+}
 
 /*
  * Test: trl::find_all
@@ -15,599 +95,37 @@
  * std::array, std::multiset, std::unordered_multiset are included.
  * are included.
  */
-SCENARIO("Find all elements in a collection using find_all.", "[find_all]") {
+TEMPLATE_TEST_CASE("Find all elements matching a criterion in a collection of characters using find_all", "[find_all]",
+                   (std::string),
+                   (std::vector<char>),
+                   (std::deque<char>),
+                   (std::multiset<char>),
+                   (std::unordered_multiset<char>)) {
 
-    GIVEN("A std::string with characters'ABCDDCBAABCDDCBAX'" ) {
 
-        auto str = std::string("ABCDDCBAABCDDCBAX");
-        REQUIRE(str.size() == 17);
+    auto cases = create_find_all_cases();
 
-        WHEN("Finding all 'A's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all(str.begin(), str.end(), std::back_inserter(results), 'A');
+    for (auto testcase : cases) {
 
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(str.begin(), results[0]) == 0);
-                REQUIRE(std::distance(str.begin(), results[1]) == 7);
-                REQUIRE(std::distance(str.begin(), results[2]) == 8);
-                REQUIRE(std::distance(str.begin(), results[3]) == 15);
-                REQUIRE(*results[0] == 'A');
-                REQUIRE(*results[1] == 'A');
-                REQUIRE(*results[2] == 'A');
-                REQUIRE(*results[3] == 'A');
-            }
-        }
+        TestType container;
+        fill_char(container, testcase.array);
 
-        WHEN("Finding all 'B's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all(str.begin(), str.end(), std::back_inserter(results), 'B');
+        REQUIRE(container.size() == testcase.array.size());
 
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(str.begin(), results[0]) == 1);
-                REQUIRE(std::distance(str.begin(), results[1]) == 6);
-                REQUIRE(std::distance(str.begin(), results[2]) == 9);
-                REQUIRE(std::distance(str.begin(), results[3]) == 14);
-                REQUIRE(*results[0] == 'B');
-                REQUIRE(*results[1] == 'B');
-                REQUIRE(*results[2] == 'B');
-                REQUIRE(*results[3] == 'B');
-            }
-        }
+        SECTION(testcase.case_title) {
+            std::vector<decltype(container.begin())> results;
+            trl::find_all(container.begin(), container.end(), std::back_inserter(results), testcase.search_item);
 
-        WHEN("Finding all 'C's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all(str.begin(), str.end(), std::back_inserter(results), 'C');
+            REQUIRE(results.size() == testcase.item_locations.size());
 
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(str.begin(), results[0]) == 2);
-                REQUIRE(std::distance(str.begin(), results[1]) == 5);
-                REQUIRE(std::distance(str.begin(), results[2]) == 10);
-                REQUIRE(std::distance(str.begin(), results[3]) == 13);
-                REQUIRE(*results[0] == 'C');
-                REQUIRE(*results[1] == 'C');
-                REQUIRE(*results[2] == 'C');
-                REQUIRE(*results[3] == 'C');
-            }
-        }
+            for (int it = 0; it < results.size(); ++it) {
 
-        WHEN("Finding all 'D's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all(str.begin(), str.end(), std::back_inserter(results), 'D');
+                if constexpr (trl::IsRandomAccessIterator<typename TestType::iterator>::value) {
+                    REQUIRE(std::distance(container.begin(), results[it]) == testcase.item_locations[it]);
+                }
 
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(str.begin(), results[0]) == 3);
-                REQUIRE(std::distance(str.begin(), results[1]) == 4);
-                REQUIRE(std::distance(str.begin(), results[2]) == 11);
-                REQUIRE(std::distance(str.begin(), results[3]) == 12);
-                REQUIRE(*results[0] == 'D');
-                REQUIRE(*results[1] == 'D');
-                REQUIRE(*results[2] == 'D');
-                REQUIRE(*results[3] == 'D');
-            }
-        }
-
-        WHEN("Finding all 'X's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all(str.begin(), str.end(), std::back_inserter(results), 'X');
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(std::distance(str.begin(), results[0]) == 16);
-                REQUIRE(*results[0] == 'X');
-            }
-        }
-
-        WHEN("Finding all 'Z's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all(str.begin(), str.end(), std::back_inserter(results), 'Z');
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::vector with integers '12344321123443219" ) {
-
-        auto vec = std::vector<int> {1,2,3,4,4,3,2,1,1,2,3,4,4,3,2,1,9};
-        REQUIRE(vec.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all(vec.begin(), vec.end(), std::back_inserter(results), 1);
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 0);
-                REQUIRE(std::distance(vec.begin(), results[1]) == 7);
-                REQUIRE(std::distance(vec.begin(), results[2]) == 8);
-                REQUIRE(std::distance(vec.begin(), results[3]) == 15);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all(vec.begin(), vec.end(), std::back_inserter(results), 2);
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 1);
-                REQUIRE(std::distance(vec.begin(), results[1]) == 6);
-                REQUIRE(std::distance(vec.begin(), results[2]) == 9);
-                REQUIRE(std::distance(vec.begin(), results[3]) == 14);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all(vec.begin(), vec.end(), std::back_inserter(results), 3);
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 2);
-                REQUIRE(std::distance(vec.begin(), results[1]) == 5);
-                REQUIRE(std::distance(vec.begin(), results[2]) == 10);
-                REQUIRE(std::distance(vec.begin(), results[3]) == 13);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all(vec.begin(), vec.end(), std::back_inserter(results), 4);
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 3);
-                REQUIRE(std::distance(vec.begin(), results[1]) == 4);
-                REQUIRE(std::distance(vec.begin(), results[2]) == 11);
-                REQUIRE(std::distance(vec.begin(), results[3]) == 12);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all(vec.begin(), vec.end(), std::back_inserter(results), 9);
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 16);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all(vec.begin(), vec.end(), std::back_inserter(results), 0);
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::deque with integers '12344321123443219" ) {
-
-        auto dqe = std::deque<int> {1, 2, 3, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4, 3, 2, 1, 9};
-        REQUIRE(dqe.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all(dqe.begin(), dqe.end(), std::back_inserter(results), 1);
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 0);
-                REQUIRE(std::distance(dqe.begin(), results[1]) == 7);
-                REQUIRE(std::distance(dqe.begin(), results[2]) == 8);
-                REQUIRE(std::distance(dqe.begin(), results[3]) == 15);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all(dqe.begin(), dqe.end(), std::back_inserter(results), 2);
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 1);
-                REQUIRE(std::distance(dqe.begin(), results[1]) == 6);
-                REQUIRE(std::distance(dqe.begin(), results[2]) == 9);
-                REQUIRE(std::distance(dqe.begin(), results[3]) == 14);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all(dqe.begin(), dqe.end(), std::back_inserter(results), 3);
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 2);
-                REQUIRE(std::distance(dqe.begin(), results[1]) == 5);
-                REQUIRE(std::distance(dqe.begin(), results[2]) == 10);
-                REQUIRE(std::distance(dqe.begin(), results[3]) == 13);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all(dqe.begin(), dqe.end(), std::back_inserter(results), 4);
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 3);
-                REQUIRE(std::distance(dqe.begin(), results[1]) == 4);
-                REQUIRE(std::distance(dqe.begin(), results[2]) == 11);
-                REQUIRE(std::distance(dqe.begin(), results[3]) == 12);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all(dqe.begin(), dqe.end(), std::back_inserter(results), 9);
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 16);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all(dqe.begin(), dqe.end(), std::back_inserter(results), 0);
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::array with integers '12344321123443219" ) {
-
-        auto arr = std::array<int, 17> {1, 2, 3, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4, 3, 2, 1, 9};
-        REQUIRE(arr.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all(arr.begin(), arr.end(), std::back_inserter(results), 1);
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 0);
-                REQUIRE(std::distance(arr.begin(), results[1]) == 7);
-                REQUIRE(std::distance(arr.begin(), results[2]) == 8);
-                REQUIRE(std::distance(arr.begin(), results[3]) == 15);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all(arr.begin(), arr.end(), std::back_inserter(results), 2);
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 1);
-                REQUIRE(std::distance(arr.begin(), results[1]) == 6);
-                REQUIRE(std::distance(arr.begin(), results[2]) == 9);
-                REQUIRE(std::distance(arr.begin(), results[3]) == 14);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all(arr.begin(), arr.end(), std::back_inserter(results), 3);
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 2);
-                REQUIRE(std::distance(arr.begin(), results[1]) == 5);
-                REQUIRE(std::distance(arr.begin(), results[2]) == 10);
-                REQUIRE(std::distance(arr.begin(), results[3]) == 13);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all(arr.begin(), arr.end(), std::back_inserter(results), 4);
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 3);
-                REQUIRE(std::distance(arr.begin(), results[1]) == 4);
-                REQUIRE(std::distance(arr.begin(), results[2]) == 11);
-                REQUIRE(std::distance(arr.begin(), results[3]) == 12);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all(arr.begin(), arr.end(), std::back_inserter(results), 9);
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 16);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all(arr.begin(), arr.end(), std::back_inserter(results), 0);
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::multiset with integers '12344321123443219" ) {
-
-        auto set = std::multiset<int> {1, 2, 3, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4, 3, 2, 1, 9};
-        REQUIRE(set.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all(set.begin(), set.end(), std::back_inserter(results), 1);
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all(set.begin(), set.end(), std::back_inserter(results), 2);
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all(set.begin(), set.end(), std::back_inserter(results), 3);
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all(set.begin(), set.end(), std::back_inserter(results), 4);
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all(set.begin(), set.end(), std::back_inserter(results), 9);
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all(set.begin(), set.end(), std::back_inserter(results), 0);
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::unordered_multiset with integers '12344321123443219" ) {
-
-        auto set = std::unordered_multiset<int> {1, 2, 3, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4, 3, 2, 1, 9};
-        REQUIRE(set.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all(set.begin(), set.end(), std::back_inserter(results), 1);
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all(set.begin(), set.end(), std::back_inserter(results), 2);
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all(set.begin(), set.end(), std::back_inserter(results), 3);
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all(set.begin(), set.end(), std::back_inserter(results), 4);
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all(set.begin(), set.end(), std::back_inserter(results), 9);
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all(set.begin(), set.end(), std::back_inserter(results), 0);
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("An empty std::string" ) {
-
-        auto str = std::string();
-        REQUIRE(str.size() == 0);
-
-        WHEN("Finding all 'Z's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all(str.begin(), str.end(), std::back_inserter(results), 'Z');
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
+                REQUIRE(*results[it] == testcase.search_item);
+                REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
             }
         }
     }
@@ -621,599 +139,39 @@ SCENARIO("Find all elements in a collection using find_all.", "[find_all]") {
  * std::array, std::multiset, std::unordered_multiset are included.
  * are included.
  */
-SCENARIO("Find all elements matching a certain criteria in a collection using find_all_if.", "[find_all_if]") {
+TEMPLATE_TEST_CASE("Find all elements matching a criterion in a collection of characters using find_all_if", "[find_all_if]",
+                   (std::string),
+                   (std::vector<char>),
+                   (std::deque<char>),
+                   (std::multiset<char>),
+                   (std::unordered_multiset<char>)) {
 
-    GIVEN("A std::string with characters'ABCDDCBAABCDDCBAX'" ) {
 
-        auto str = std::string("ABCDDCBAABCDDCBAX");
-        REQUIRE(str.size() == 17);
+    auto cases = create_find_all_cases();
 
-        WHEN("Finding all 'A's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'A';});
+    for (auto testcase : cases) {
 
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(str.begin(), results[0]) == 0);
-                REQUIRE(std::distance(str.begin(), results[1]) == 7);
-                REQUIRE(std::distance(str.begin(), results[2]) == 8);
-                REQUIRE(std::distance(str.begin(), results[3]) == 15);
-                REQUIRE(*results[0] == 'A');
-                REQUIRE(*results[1] == 'A');
-                REQUIRE(*results[2] == 'A');
-                REQUIRE(*results[3] == 'A');
-            }
-        }
+        TestType container;
+        fill_char(container, testcase.array);
 
-        WHEN("Finding all 'B's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'B';});
+        REQUIRE(container.size() == testcase.array.size());
 
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(str.begin(), results[0]) == 1);
-                REQUIRE(std::distance(str.begin(), results[1]) == 6);
-                REQUIRE(std::distance(str.begin(), results[2]) == 9);
-                REQUIRE(std::distance(str.begin(), results[3]) == 14);
-                REQUIRE(*results[0] == 'B');
-                REQUIRE(*results[1] == 'B');
-                REQUIRE(*results[2] == 'B');
-                REQUIRE(*results[3] == 'B');
-            }
-        }
+        SECTION(testcase.case_title) {
+            std::vector<decltype(container.begin())> results;
+            trl::find_all_if(container.begin(), container.end(), std::back_inserter(results), [&](char c) {
+                return c == testcase.search_item;
+            });
 
-        WHEN("Finding all 'C's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'C';});
+            REQUIRE(results.size() == testcase.item_locations.size());
 
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(str.begin(), results[0]) == 2);
-                REQUIRE(std::distance(str.begin(), results[1]) == 5);
-                REQUIRE(std::distance(str.begin(), results[2]) == 10);
-                REQUIRE(std::distance(str.begin(), results[3]) == 13);
-                REQUIRE(*results[0] == 'C');
-                REQUIRE(*results[1] == 'C');
-                REQUIRE(*results[2] == 'C');
-                REQUIRE(*results[3] == 'C');
-            }
-        }
+            for (int it = 0; it < results.size(); ++it) {
 
-        WHEN("Finding all 'D's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'D';});
+                if constexpr (trl::IsRandomAccessIterator<typename TestType::iterator>::value) {
+                    REQUIRE(std::distance(container.begin(), results[it]) == testcase.item_locations[it]);
+                }
 
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(str.begin(), results[0]) == 3);
-                REQUIRE(std::distance(str.begin(), results[1]) == 4);
-                REQUIRE(std::distance(str.begin(), results[2]) == 11);
-                REQUIRE(std::distance(str.begin(), results[3]) == 12);
-                REQUIRE(*results[0] == 'D');
-                REQUIRE(*results[1] == 'D');
-                REQUIRE(*results[2] == 'D');
-                REQUIRE(*results[3] == 'D');
-            }
-        }
-
-        WHEN("Finding all 'X's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'X';});
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(std::distance(str.begin(), results[0]) == 16);
-                REQUIRE(*results[0] == 'X');
-            }
-        }
-
-        WHEN("Finding all 'Z's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'Z';});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::vector with integers '12344321123443219" ) {
-
-        auto vec = std::vector<int> {1,2,3,4,4,3,2,1,1,2,3,4,4,3,2,1,9};
-        REQUIRE(vec.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all_if(vec.begin(), vec.end(), std::back_inserter(results), [](int i) {return i == 1;});
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 0);
-                REQUIRE(std::distance(vec.begin(), results[1]) == 7);
-                REQUIRE(std::distance(vec.begin(), results[2]) == 8);
-                REQUIRE(std::distance(vec.begin(), results[3]) == 15);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all_if(vec.begin(), vec.end(), std::back_inserter(results), [](int i) {return i == 2;});
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 1);
-                REQUIRE(std::distance(vec.begin(), results[1]) == 6);
-                REQUIRE(std::distance(vec.begin(), results[2]) == 9);
-                REQUIRE(std::distance(vec.begin(), results[3]) == 14);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all_if(vec.begin(), vec.end(), std::back_inserter(results), [](int i) {return i == 3;});
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 2);
-                REQUIRE(std::distance(vec.begin(), results[1]) == 5);
-                REQUIRE(std::distance(vec.begin(), results[2]) == 10);
-                REQUIRE(std::distance(vec.begin(), results[3]) == 13);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all_if(vec.begin(), vec.end(), std::back_inserter(results), [](int i) {return i == 4;});
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 3);
-                REQUIRE(std::distance(vec.begin(), results[1]) == 4);
-                REQUIRE(std::distance(vec.begin(), results[2]) == 11);
-                REQUIRE(std::distance(vec.begin(), results[3]) == 12);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all_if(vec.begin(), vec.end(), std::back_inserter(results), [](int i) {return i == 9;});
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 16);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all_if(vec.begin(), vec.end(), std::back_inserter(results), [](int i) {return i == 0;});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::deque with integers '12344321123443219" ) {
-
-        auto dqe = std::deque<int> {1, 2, 3, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4, 3, 2, 1, 9};
-        REQUIRE(dqe.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all_if(dqe.begin(), dqe.end(), std::back_inserter(results), [](int i) {return i == 1;});
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 0);
-                REQUIRE(std::distance(dqe.begin(), results[1]) == 7);
-                REQUIRE(std::distance(dqe.begin(), results[2]) == 8);
-                REQUIRE(std::distance(dqe.begin(), results[3]) == 15);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all_if(dqe.begin(), dqe.end(), std::back_inserter(results), [](int i) {return i == 2;});
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 1);
-                REQUIRE(std::distance(dqe.begin(), results[1]) == 6);
-                REQUIRE(std::distance(dqe.begin(), results[2]) == 9);
-                REQUIRE(std::distance(dqe.begin(), results[3]) == 14);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all_if(dqe.begin(), dqe.end(), std::back_inserter(results), [](int i) {return i == 3;});
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 2);
-                REQUIRE(std::distance(dqe.begin(), results[1]) == 5);
-                REQUIRE(std::distance(dqe.begin(), results[2]) == 10);
-                REQUIRE(std::distance(dqe.begin(), results[3]) == 13);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all_if(dqe.begin(), dqe.end(), std::back_inserter(results), [](int i) {return i == 4;});
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 3);
-                REQUIRE(std::distance(dqe.begin(), results[1]) == 4);
-                REQUIRE(std::distance(dqe.begin(), results[2]) == 11);
-                REQUIRE(std::distance(dqe.begin(), results[3]) == 12);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all_if(dqe.begin(), dqe.end(), std::back_inserter(results), [](int i) {return i == 9;});
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 16);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all_if(dqe.begin(), dqe.end(), std::back_inserter(results), [](int i) {return i == 0;});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::array with integers '12344321123443219" ) {
-
-        auto arr = std::array<int, 17> {1, 2, 3, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4, 3, 2, 1, 9};
-        REQUIRE(arr.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all_if(arr.begin(), arr.end(), std::back_inserter(results), [](int i) {return i == 1;});
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 0);
-                REQUIRE(std::distance(arr.begin(), results[1]) == 7);
-                REQUIRE(std::distance(arr.begin(), results[2]) == 8);
-                REQUIRE(std::distance(arr.begin(), results[3]) == 15);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all_if(arr.begin(), arr.end(), std::back_inserter(results), [](int i) {return i == 2;});
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 1);
-                REQUIRE(std::distance(arr.begin(), results[1]) == 6);
-                REQUIRE(std::distance(arr.begin(), results[2]) == 9);
-                REQUIRE(std::distance(arr.begin(), results[3]) == 14);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all_if(arr.begin(), arr.end(), std::back_inserter(results), [](int i) {return i == 3;});
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 2);
-                REQUIRE(std::distance(arr.begin(), results[1]) == 5);
-                REQUIRE(std::distance(arr.begin(), results[2]) == 10);
-                REQUIRE(std::distance(arr.begin(), results[3]) == 13);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all_if(arr.begin(), arr.end(), std::back_inserter(results), [](int i) {return i == 4;});
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 3);
-                REQUIRE(std::distance(arr.begin(), results[1]) == 4);
-                REQUIRE(std::distance(arr.begin(), results[2]) == 11);
-                REQUIRE(std::distance(arr.begin(), results[3]) == 12);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all_if(arr.begin(), arr.end(), std::back_inserter(results), [](int i) {return i == 9;});
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 16);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all_if(arr.begin(), arr.end(), std::back_inserter(results), [](int i) {return i == 0;});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::multiset with integers '12344321123443219" ) {
-
-        auto set = std::multiset<int> {1, 2, 3, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4, 3, 2, 1, 9};
-        REQUIRE(set.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 1;});
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 2;});
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 3;});
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 4;});
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 9;});
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 0;});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::unordered_multiset with integers '12344321123443219" ) {
-
-        auto set = std::unordered_multiset<int> {1, 2, 3, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4, 3, 2, 1, 9};
-        REQUIRE(set.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 1;});
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 2;});
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 3;});
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 4;});
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 9;});
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 0;});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("An empty std::string" ) {
-
-        auto str = std::string();
-        REQUIRE(str.size() == 0);
-
-        WHEN("Finding all 'Z's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'Z';});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
+                REQUIRE(*results[it] == testcase.search_item);
+                REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
             }
         }
     }
@@ -1227,633 +185,37 @@ SCENARIO("Find all elements matching a certain criteria in a collection using fi
  * std::array, std::multiset, std::unordered_multiset are included.
  * are included.
  */
-SCENARIO("Find all elements matching a certain criteria in a collection using find_all_if_not.", "[find_all_if_not]") {
+TEMPLATE_TEST_CASE("Find all elements not matching a criterion in a collection of characters using find_all_if_not", "[find_all_if_not]",
+                   (std::string),
+                   (std::vector<char>),
+                   (std::deque<char>),
+                   (std::multiset<char>),
+                   (std::unordered_multiset<char>)) {
 
-    GIVEN("A std::string with characters'ABCDDCBAABCDDCBAX'" ) {
 
-        auto str = std::string("ABCDDCBAABCDDCBAX");
-        REQUIRE(str.size() == 17);
+    auto cases = create_find_all_cases();
+    for (auto testcase : cases) {
 
-        WHEN("Finding all elements !='A' in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if_not(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'A';});
+        TestType container;
+        fill_char(container, testcase.array);
+        REQUIRE(container.size() == testcase.array.size());
 
-            THEN("13 items are found at position 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14 and 16") {
-                REQUIRE(results.size() == 13);
-                REQUIRE(std::distance(str.begin(), results[0]) == 1);
-                REQUIRE(std::distance(str.begin(), results[1]) == 2);
-                REQUIRE(std::distance(str.begin(), results[2]) == 3);
-                REQUIRE(std::distance(str.begin(), results[3]) == 4);
-                REQUIRE(std::distance(str.begin(), results[4]) == 5);
-                REQUIRE(std::distance(str.begin(), results[5]) == 6);
-                REQUIRE(std::distance(str.begin(), results[6]) == 9);
-                REQUIRE(std::distance(str.begin(), results[7]) == 10);
-                REQUIRE(std::distance(str.begin(), results[8]) == 11);
-                REQUIRE(std::distance(str.begin(), results[9]) == 12);
-                REQUIRE(std::distance(str.begin(), results[10]) == 13);
-                REQUIRE(std::distance(str.begin(), results[11]) == 14);
-                REQUIRE(std::distance(str.begin(), results[12]) == 16);
-                REQUIRE(*results[0] == 'B');
-                REQUIRE(*results[1] == 'C');
-                REQUIRE(*results[2] == 'D');
-                REQUIRE(*results[3] == 'D');
-                REQUIRE(*results[4] == 'C');
-                REQUIRE(*results[5] == 'B');
-                REQUIRE(*results[6] == 'B');
-                REQUIRE(*results[7] == 'C');
-                REQUIRE(*results[8] == 'D');
-                REQUIRE(*results[9] == 'D');
-                REQUIRE(*results[10] == 'C');
-                REQUIRE(*results[11] == 'B');
-                REQUIRE(*results[12] == 'X');
-            }
-        }
-        WHEN("Finding all elements !='B' in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if_not(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'B';});
+        SECTION(testcase.case_title) {
+            std::vector<decltype(container.begin())> results;
+            trl::find_all_if_not(container.begin(), container.end(), std::back_inserter(results), [&](char c) {
+                return c != testcase.search_item;
+            });
 
-            THEN("Four items are found at position 0, 2, 3, 4, 5, 7, 8, 10, 11, 12, 13, 15, 16") {
-                REQUIRE(results.size() == 13);
-                REQUIRE(std::distance(str.begin(), results[0]) == 0);
-                REQUIRE(std::distance(str.begin(), results[1]) == 2);
-                REQUIRE(std::distance(str.begin(), results[2]) == 3);
-                REQUIRE(std::distance(str.begin(), results[3]) == 4);
-                REQUIRE(std::distance(str.begin(), results[4]) == 5);
-                REQUIRE(std::distance(str.begin(), results[5]) == 7);
-                REQUIRE(std::distance(str.begin(), results[6]) == 8);
-                REQUIRE(std::distance(str.begin(), results[7]) == 10);
-                REQUIRE(std::distance(str.begin(), results[8]) == 11);
-                REQUIRE(std::distance(str.begin(), results[9]) == 12);
-                REQUIRE(std::distance(str.begin(), results[10]) == 13);
-                REQUIRE(std::distance(str.begin(), results[11]) == 15);
-                REQUIRE(std::distance(str.begin(), results[12]) == 16);
-                REQUIRE(*results[0] == 'A');
-                REQUIRE(*results[1] == 'C');
-                REQUIRE(*results[2] == 'D');
-                REQUIRE(*results[3] == 'D');
-                REQUIRE(*results[4] == 'C');
-                REQUIRE(*results[5] == 'A');
-                REQUIRE(*results[6] == 'A');
-                REQUIRE(*results[7] == 'C');
-                REQUIRE(*results[8] == 'D');
-                REQUIRE(*results[9] == 'D');
-                REQUIRE(*results[10] == 'C');
-                REQUIRE(*results[11] == 'A');
-                REQUIRE(*results[12] == 'X');
-            }
-        }
-        WHEN("Finding all 'C's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if_not(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'C';});
+            REQUIRE(results.size() == testcase.item_locations.size());
 
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(str.begin(), results[0]) == 2);
-                REQUIRE(std::distance(str.begin(), results[1]) == 5);
-                REQUIRE(std::distance(str.begin(), results[2]) == 10);
-                REQUIRE(std::distance(str.begin(), results[3]) == 13);
-                REQUIRE(*results[0] == 'C');
-                REQUIRE(*results[1] == 'C');
-                REQUIRE(*results[2] == 'C');
-                REQUIRE(*results[3] == 'C');
-            }
-        }
+            for (int it = 0; it < results.size(); ++it) {
 
-        WHEN("Finding all 'D's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if_not(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'D';});
+                if constexpr (trl::IsRandomAccessIterator<typename TestType::iterator>::value) {
+                    REQUIRE(std::distance(container.begin(), results[it]) == testcase.item_locations[it]);
+                }
 
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(str.begin(), results[0]) == 3);
-                REQUIRE(std::distance(str.begin(), results[1]) == 4);
-                REQUIRE(std::distance(str.begin(), results[2]) == 11);
-                REQUIRE(std::distance(str.begin(), results[3]) == 12);
-                REQUIRE(*results[0] == 'D');
-                REQUIRE(*results[1] == 'D');
-                REQUIRE(*results[2] == 'D');
-                REQUIRE(*results[3] == 'D');
-            }
-        }
-
-        WHEN("Finding all 'X's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if_not(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'X';});
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(std::distance(str.begin(), results[0]) == 16);
-                REQUIRE(*results[0] == 'X');
-            }
-        }
-
-        WHEN("Finding all 'Z's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if_not(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'Z';});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::vector with integers '12344321123443219" ) {
-
-        auto vec = std::vector<int> {1,2,3,4,4,3,2,1,1,2,3,4,4,3,2,1,9};
-        REQUIRE(vec.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all_if_not(vec.begin(), vec.end(), std::back_inserter(results), [](int i) {return i == 1;});
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 0);
-                REQUIRE(std::distance(vec.begin(), results[1]) == 7);
-                REQUIRE(std::distance(vec.begin(), results[2]) == 8);
-                REQUIRE(std::distance(vec.begin(), results[3]) == 15);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all_if_not(vec.begin(), vec.end(), std::back_inserter(results), [](int i) {return i == 2;});
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 1);
-                REQUIRE(std::distance(vec.begin(), results[1]) == 6);
-                REQUIRE(std::distance(vec.begin(), results[2]) == 9);
-                REQUIRE(std::distance(vec.begin(), results[3]) == 14);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all_if_not(vec.begin(), vec.end(), std::back_inserter(results), [](int i) {return i == 3;});
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 2);
-                REQUIRE(std::distance(vec.begin(), results[1]) == 5);
-                REQUIRE(std::distance(vec.begin(), results[2]) == 10);
-                REQUIRE(std::distance(vec.begin(), results[3]) == 13);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all_if_not(vec.begin(), vec.end(), std::back_inserter(results), [](int i) {return i == 4;});
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 3);
-                REQUIRE(std::distance(vec.begin(), results[1]) == 4);
-                REQUIRE(std::distance(vec.begin(), results[2]) == 11);
-                REQUIRE(std::distance(vec.begin(), results[3]) == 12);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all_if_not(vec.begin(), vec.end(), std::back_inserter(results), [](int i) {return i == 9;});
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(std::distance(vec.begin(), results[0]) == 16);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(vec.begin())> results;
-            trl::find_all_if_not(vec.begin(), vec.end(), std::back_inserter(results), [](int i) {return i == 0;});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::deque with integers '12344321123443219" ) {
-
-        auto dqe = std::deque<int> {1, 2, 3, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4, 3, 2, 1, 9};
-        REQUIRE(dqe.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all_if_not(dqe.begin(), dqe.end(), std::back_inserter(results), [](int i) {return i == 1;});
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 0);
-                REQUIRE(std::distance(dqe.begin(), results[1]) == 7);
-                REQUIRE(std::distance(dqe.begin(), results[2]) == 8);
-                REQUIRE(std::distance(dqe.begin(), results[3]) == 15);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all_if_not(dqe.begin(), dqe.end(), std::back_inserter(results), [](int i) {return i == 2;});
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 1);
-                REQUIRE(std::distance(dqe.begin(), results[1]) == 6);
-                REQUIRE(std::distance(dqe.begin(), results[2]) == 9);
-                REQUIRE(std::distance(dqe.begin(), results[3]) == 14);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all_if_not(dqe.begin(), dqe.end(), std::back_inserter(results), [](int i) {return i == 3;});
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 2);
-                REQUIRE(std::distance(dqe.begin(), results[1]) == 5);
-                REQUIRE(std::distance(dqe.begin(), results[2]) == 10);
-                REQUIRE(std::distance(dqe.begin(), results[3]) == 13);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all_if_not(dqe.begin(), dqe.end(), std::back_inserter(results), [](int i) {return i == 4;});
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 3);
-                REQUIRE(std::distance(dqe.begin(), results[1]) == 4);
-                REQUIRE(std::distance(dqe.begin(), results[2]) == 11);
-                REQUIRE(std::distance(dqe.begin(), results[3]) == 12);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all_if_not(dqe.begin(), dqe.end(), std::back_inserter(results), [](int i) {return i == 9;});
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(std::distance(dqe.begin(), results[0]) == 16);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(dqe.begin())> results;
-            trl::find_all_if_not(dqe.begin(), dqe.end(), std::back_inserter(results), [](int i) {return i == 0;});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::array with integers '12344321123443219" ) {
-
-        auto arr = std::array<int, 17> {1, 2, 3, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4, 3, 2, 1, 9};
-        REQUIRE(arr.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all_if_not(arr.begin(), arr.end(), std::back_inserter(results), [](int i) {return i == 1;});
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 0);
-                REQUIRE(std::distance(arr.begin(), results[1]) == 7);
-                REQUIRE(std::distance(arr.begin(), results[2]) == 8);
-                REQUIRE(std::distance(arr.begin(), results[3]) == 15);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all_if_not(arr.begin(), arr.end(), std::back_inserter(results), [](int i) {return i == 2;});
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 1);
-                REQUIRE(std::distance(arr.begin(), results[1]) == 6);
-                REQUIRE(std::distance(arr.begin(), results[2]) == 9);
-                REQUIRE(std::distance(arr.begin(), results[3]) == 14);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all_if_not(arr.begin(), arr.end(), std::back_inserter(results), [](int i) {return i == 3;});
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 2);
-                REQUIRE(std::distance(arr.begin(), results[1]) == 5);
-                REQUIRE(std::distance(arr.begin(), results[2]) == 10);
-                REQUIRE(std::distance(arr.begin(), results[3]) == 13);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all_if_not(arr.begin(), arr.end(), std::back_inserter(results), [](int i) {return i == 4;});
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 3);
-                REQUIRE(std::distance(arr.begin(), results[1]) == 4);
-                REQUIRE(std::distance(arr.begin(), results[2]) == 11);
-                REQUIRE(std::distance(arr.begin(), results[3]) == 12);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all_if_not(arr.begin(), arr.end(), std::back_inserter(results), [](int i) {return i == 9;});
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(std::distance(arr.begin(), results[0]) == 16);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(arr.begin())> results;
-            trl::find_all_if_not(arr.begin(), arr.end(), std::back_inserter(results), [](int i) {return i == 0;});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::multiset with integers '12344321123443219" ) {
-
-        auto set = std::multiset<int> {1, 2, 3, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4, 3, 2, 1, 9};
-        REQUIRE(set.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if_not(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 1;});
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if_not(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 2;});
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if_not(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 3;});
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if_not(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 4;});
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if_not(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 9;});
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if_not(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 0;});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("A std::unordered_multiset with integers '12344321123443219" ) {
-
-        auto set = std::unordered_multiset<int> {1, 2, 3, 4, 4, 3, 2, 1, 1, 2, 3, 4, 4, 3, 2, 1, 9};
-        REQUIRE(set.size() == 17);
-
-        WHEN("Finding all 1's in the vector") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if_not(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 1;});
-
-            THEN("Four items are found at position 0, 7, 8 and 15") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 1);
-                REQUIRE(*results[1] == 1);
-                REQUIRE(*results[2] == 1);
-                REQUIRE(*results[3] == 1);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 2's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if_not(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 2;});
-
-            THEN("Four items are found at position 1, 6, 9 and 14") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 2);
-                REQUIRE(*results[1] == 2);
-                REQUIRE(*results[2] == 2);
-                REQUIRE(*results[3] == 2);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 3's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if_not(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 3;});
-
-            THEN("Four items are found at position 2, 5, 10 and 13") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 3);
-                REQUIRE(*results[1] == 3);
-                REQUIRE(*results[2] == 3);
-                REQUIRE(*results[3] == 3);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 4's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if_not(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 4;});
-
-            THEN("Four items are found at position 3, 4, 11 and 12") {
-                REQUIRE(results.size() == 4);
-                REQUIRE(*results[0] == 4);
-                REQUIRE(*results[1] == 4);
-                REQUIRE(*results[2] == 4);
-                REQUIRE(*results[3] == 4);
-
-                REQUIRE(results[0] != results[1]);
-                REQUIRE(results[0] != results[2]);
-                REQUIRE(results[0] != results[3]);
-                REQUIRE(results[1] != results[2]);
-                REQUIRE(results[1] != results[3]);
-                REQUIRE(results[2] != results[3]);
-            }
-        }
-
-        WHEN("Finding all 9's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 9;});
-
-            THEN("One items are found at position 16") {
-                REQUIRE(results.size() == 1);
-                REQUIRE(*results[0] == 9);
-            }
-        }
-
-        WHEN("Finding all 0's in the string") {
-            std::vector<decltype(set.begin())> results;
-            trl::find_all_if(set.begin(), set.end(), std::back_inserter(results), [](int i) {return i == 0;});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
-            }
-        }
-    }
-    GIVEN("An empty std::string" ) {
-
-        auto str = std::string();
-        REQUIRE(str.size() == 0);
-
-        WHEN("Finding all 'Z's in the string") {
-            std::vector<decltype(str.begin())> results;
-            trl::find_all_if_not(str.begin(), str.end(), std::back_inserter(results), [](char c) {return c == 'Z';});
-
-            THEN("Zero items are found") {
-                REQUIRE(results.size() == 0);
+                REQUIRE(*results[it] == testcase.search_item);
+                REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
             }
         }
     }
