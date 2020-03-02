@@ -8,6 +8,11 @@
 #include <unordered_set>
 #include <type_traits>
 
+//#if defined(__GNUC__) && !defined(__clang__)
+#if defined(_MSC_VER)
+    #include <execution>
+#endif
+
 template<typename T>
 struct CaseDef
 {
@@ -109,25 +114,39 @@ TEMPLATE_TEST_CASE("Find all elements matching a criterion in a collection of ch
 
         TestType container;
         fill_char(container, testcase.array);
-
         REQUIRE(container.size() == testcase.array.size());
 
         SECTION(testcase.case_title) {
             std::vector<decltype(container.begin())> results;
             trl::find_all(container.begin(), container.end(), std::back_inserter(results), testcase.search_item);
-
             REQUIRE(results.size() == testcase.item_locations.size());
 
             for (int it = 0; it < results.size(); ++it) {
-
                 if constexpr (trl::IsRandomAccessIterator<typename TestType::iterator>::value) {
                     REQUIRE(std::distance(container.begin(), results[it]) == testcase.item_locations[it]);
                 }
-
                 REQUIRE(*results[it] == testcase.search_item);
                 REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
             }
         }
+
+//#if defined(__GNUC__) && !defined(__clang__)
+#if defined(_MSC_VER)
+        SECTION(testcase.case_title + " (Parallel)") {
+            std::vector<decltype(container.begin())> results;
+            trl::find_all(std::execution::par, container.begin(), container.end(), std::back_inserter(results), testcase.search_item);
+            REQUIRE(results.size() == testcase.item_locations.size());
+
+            for (int it = 0; it < results.size(); ++it) {
+                if constexpr (trl::IsRandomAccessIterator<typename TestType::iterator>::value) {
+                    REQUIRE(std::distance(container.begin(), results[it]) == testcase.item_locations[it]);
+                }
+                REQUIRE(*results[it] == testcase.search_item);
+                REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
+            }
+        }
+#endif
+
     }
 }
 
@@ -174,6 +193,29 @@ TEMPLATE_TEST_CASE("Find all elements matching a criterion in a collection of ch
                 REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
             }
         }
+
+//#if defined(__GNUC__) && !defined(__clang__)
+#if defined(_MSC_VER)
+        SECTION(testcase.case_title + " (Parallel)") {
+            std::vector<decltype(container.begin())> results;
+            trl::find_all_if(std::execution::par, container.begin(), container.end(), std::back_inserter(results), [&](char c) {
+                return c == testcase.search_item;
+            });
+
+            REQUIRE(results.size() == testcase.item_locations.size());
+
+            for (int it = 0; it < results.size(); ++it) {
+
+                if constexpr (trl::IsRandomAccessIterator<typename TestType::iterator>::value) {
+                    REQUIRE(std::distance(container.begin(), results[it]) == testcase.item_locations[it]);
+                }
+
+                REQUIRE(*results[it] == testcase.search_item);
+                REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
+            }
+        }
+#endif
+
     }
 }
 
@@ -218,5 +260,29 @@ TEMPLATE_TEST_CASE("Find all elements not matching a criterion in a collection o
                 REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
             }
         }
+
+//#if defined(__GNUC__) && !defined(__clang__)
+#if defined(_MSC_VER)
+        SECTION(testcase.case_title + " (Parallel)") {
+            std::vector<decltype(container.begin())> results;
+            trl::find_all_if_not(std::execution::par, container.begin(), container.end(), std::back_inserter(results), [&](char c) {
+                return c != testcase.search_item;
+            });
+
+            REQUIRE(results.size() == testcase.item_locations.size());
+
+            for (int it = 0; it < results.size(); ++it) {
+
+                if constexpr (trl::IsRandomAccessIterator<typename TestType::iterator>::value) {
+                    REQUIRE(std::distance(container.begin(), results[it]) == testcase.item_locations[it]);
+                }
+
+                REQUIRE(*results[it] == testcase.search_item);
+                REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
+            }
+        }
+
+#endif
+
     }
 }

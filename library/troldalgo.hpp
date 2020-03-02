@@ -109,7 +109,7 @@ namespace trl
      *   @code{.cpp}
      *      auto str = std::string("ABCDDCBAABCDDCBAX");
      *      std::vector<decltype(str.begin())> results;
-            trl::find_all(std::par, str.begin(),str.end(), std::back_inserter(results), 'A');
+            trl::find_all(std::execution::par, str.begin(),str.end(), std::back_inserter(results), 'A');
      *   @endcode
      * @tparam ExecutionPolicy The execution policy to use. This has to be one of the policies defined in the standard library.
      * @tparam InputIt The type of the input iterator parameters. InputIt will be auto-deducted by the compiler.
