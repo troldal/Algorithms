@@ -4,6 +4,7 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 cmake_policy(SET CMP0092 NEW) # Enable setting custom warning level on MSVC
 project(Algorithms CXX)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 #=======================================================================================================================
 # Set project metadata

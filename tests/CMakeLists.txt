@@ -8,8 +8,31 @@ target_include_directories(Catch SYSTEM INTERFACE ${CMAKE_CURRENT_LIST_DIR}/catc
 # Define TEST target
 #=======================================================================================================================
 add_executable(TroldalgoTestSuite "")
-target_sources(TroldalgoTestSuite PRIVATE TroldalgoTestSuite.cpp)
-target_link_libraries(TroldalgoTestSuite PRIVATE Catch Algorithms)
+target_sources(TroldalgoTestSuite
+        PRIVATE
+        test_find_all.cpp
+        test_find_all_if.cpp
+        test_find_all_if_not.cpp
+        test_find_first_not_of.cpp
+        test_find_all_of.cpp)
+
+target_link_libraries(TroldalgoTestSuite PRIVATE ${TBB_LIBRARIES} Catch Algorithms)
+
+#=======================================================================================================================
+# Settings for testing of parallel algorithms
+#=======================================================================================================================
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Intel" OR CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    option(RUN_PARALLEL_TESTS "Run tests using parallel algorithms (GCC requires Intel TBB to be installed)" ON)
+
+    if(${RUN_PARALLEL_TESTS})
+        target_compile_definitions(TroldalgoTestSuite PRIVATE PARALLEL_ENABLED)
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            find_package(TBB REQUIRED)
+            target_include_directories(TroldalgoTestSuite PRIVATE ${TBB_INCLUDE_DIRS})
+            target_link_libraries(TroldalgoTestSuite PRIVATE ${TBB_LIBRARIES})
+        endif()
+    endif()
+endif()
 
 #=======================================================================================================================
 # Set warning flags
@@ -82,8 +105,8 @@ endif ()
 # Enable code sanitizers
 #=======================================================================================================================
 if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))
-    target_compile_options(TroldalgoTestSuite PRIVATE -g -fno-omit-frame-pointer -fsanitize=undefined)
-    target_link_options(TroldalgoTestSuite PRIVATE -fno-omit-frame-pointer -fsanitize=undefined)
+    target_compile_options(TroldalgoTestSuite PRIVATE -g -fno-omit-frame-pointer -fsanitize=undefined) #,nullability,implicit-conversion,integer,float-divide-by-zero)
+    target_link_options(TroldalgoTestSuite PRIVATE -fno-omit-frame-pointer -fsanitize=undefined) #,nullability,implicit-conversion,integer,float-divide-by-zero)
 endif ()
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fno-omit-frame-pointer -fsanitize=leak")

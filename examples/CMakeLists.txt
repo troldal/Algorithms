@@ -5,7 +5,13 @@ add_executable(Example1 Example1.cpp)
 target_link_libraries(Example1 PRIVATE Algorithms)
 
 #=======================================================================================================================
-# Define Example1 target
+# Define Example2 target
 #=======================================================================================================================
 add_executable(Example2 example2.cpp)
 target_link_libraries(Example2 PRIVATE Algorithms)
+
+#=======================================================================================================================
+# Define Example3 target
+#=======================================================================================================================
+add_executable(Example3 example3.cpp)
+target_link_libraries(Example3 PRIVATE Algorithms)
