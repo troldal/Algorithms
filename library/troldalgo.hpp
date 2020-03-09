@@ -111,10 +111,11 @@ namespace trl
      *      std::vector<decltype(str.begin())> results;
             trl::find_all(std::execution::par, str.begin(),str.end(), std::back_inserter(results), 'A');
      *   @endcode
-     * @tparam ExecutionPolicy The execution policy to use. This has to be one of the policies defined in the standard library.
+     * @tparam ExecutionPolicy The execution policy to use. ExecutionPolicy will be auto-deduced by the compiler.
      * @tparam InputIt The type of the input iterator parameters. InputIt will be auto-deducted by the compiler.
      * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
      * @tparam T The type of the value to find. T will be auto-deducted by the compiler.
+     * @param policy The execution policy to use, e.g. std::execution::par.
      * @param first The first element in the range to examine.
      * @param last One element beyond the last element in the range to examine.
      * @param d_first An output iterator pointing to the first element to fill in the output container.
@@ -187,10 +188,11 @@ namespace trl
      *      std::vector<decltype(str.begin())> results;
             trl::find_all_if(str.begin(),str.end(), std::back_inserter(results), [](char c) {return c == 'A';});
      *   @endcode
-     * @tparam ExecutionPolicy The execution policy to use, eg. std::execution::par
+     * @tparam ExecutionPolicy The execution policy to use. ExecutionPolicy will be auto-deduced by the compiler.
      * @tparam InputIt The type of the input iterator parameters. InputIt will be auto-deducted by the compiler.
      * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
      * @tparam UnaryPredicate The type of the predicate function. UnaryPredicate will be auto-deducted by the compiler.
+     * @param policy The execution policy to use, e.g. std::execution::par.
      * @param first The first element in the range to examine.
      * @param last One element beyond the last element in the range to examine.
      * @param d_first An output iterator pointing to the first element to fill in the output container.
@@ -263,10 +265,11 @@ namespace trl
      *      std::vector<decltype(str.begin())> results;
      *      trl::find_all_if_not(str.begin(),str.end(), std::back_inserter(results), [](char c) {return c == 'A';});
      *   @endcode
-     * @tparam ExecutionPolicy The execution policy to use, eg. std::execution::par
+     * @tparam ExecutionPolicy The execution policy to use. ExecutionPolicy will be auto-deduced by the compiler.
      * @tparam InputIt The type of the input iterator parameters. InputIt will be auto-deducted by the compiler.
      * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
      * @tparam UnaryPredicate The type of the predicate function. UnaryPredicate will be auto-deducted by the compiler.
+     * @param policy The execution policy to use, e.g. std::execution::par.
      * @param first The first element in the range to examine.
      * @param last One element beyond the last element in the range to examine.
      * @param d_first An output iterator pointing to the first element to fill in the output container.
@@ -334,9 +337,10 @@ namespace trl
      *      auto src = std::string("AB");
      *      trl::find_first_not_of(str.begin(),str.end(), src.begin(), src.end());
      *   @endcode
-     * @tparam ExecutionPolicy The execution policy to use, eg. std::execution::par
+     * @tparam ExecutionPolicy The execution policy to use. ExecutionPolicy will be auto-deduced by the compiler.
      * @tparam ForwardIt1 The type of the input iterator parameters. ForwardIt1 will be auto-deducted by the compiler.
      * @tparam ForwardIt2 The type of the search iterator parameters. ForwardIt2 will be auto-deducted by the compiler.
+     * @param policy The execution policy to use, e.g. std::execution::par.
      * @param first The first element in the range to examine.
      * @param last One element beyond the last element in the range to examine.
      * @param s_first The first element in the range of elements to search for.
@@ -350,11 +354,13 @@ namespace trl
                                  ForwardIt1 first,
                                  ForwardIt1 last,
                                  ForwardIt2 s_first,
-                                 ForwardIt2 s_last ) {
+                                 ForwardIt2 s_last) {
         return std::find_if(policy, first, last, [&](const decltype(*first)& val) {
             return (std::find(s_first, s_last, val) == s_last);
         });
     }
+
+    // TODO: Implement trl::find_first_not_of with predicates.
 
 //    /**
 //     * @brief
@@ -458,10 +464,11 @@ namespace trl
      *      std::vector<decltype(str.begin())> results;
             trl::find_all_of(str.begin(),str.end(), src.begin(), src.end(), std::back_inserter(results));
      *   @endcode
-     * @tparam ExecutionPolicy The execution policy to use, eg. std::execution::par.
+     * @tparam ExecutionPolicy The execution policy to use. ExecutionPolicy will be auto-deduced by the compiler.
      * @tparam ForwardIt1 The type of the input iterator parameters. ForwardIt1 will be auto-deducted by the compiler.
      * @tparam ForwardIt2 The type of the search iterator parameters. ForwardIt2 will be auto-deducted by the compiler.
      * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
+     * @param policy The execution policy to use, e.g. std::execution::par.
      * @param first The first element in the range to examine.
      * @param last One element beyond the last element in the range to examine.
      * @param s_first The first element in the search range.
@@ -490,18 +497,31 @@ namespace trl
     }
 
     /**
-     * @brief
-     * @tparam ForwardIt1
-     * @tparam ForwardIt2
-     * @tparam OutputIt
-     * @tparam BinaryPredicate
-     * @param first
-     * @param last
-     * @param s_first
-     * @param s_last
-     * @param d_first
-     * @param p
-     * @return
+     * @brief Finds all elements of a given range of value in a container, in the range [first, last), using a predicate.
+     * @details This algorithm is a wrapper around the std::find_first_of algorithm. It simply calls std::find_first_of
+     * on the provided container, until all elements have been found, or until the last element has been reached.
+     * #### Example
+     * The following example will find all occurrences of the letters {'A', 'B'} in a given string. It will find eight items at
+     * position 0, 1, 6, 7, 8, 9, 14 and 15. Iterators to those elements will be copied to the results vector.
+     *   @code{.cpp}
+     *      auto str = std::string("ABCDDCBAABCDDCBAX");
+     *      auto src = std::string("AB");
+     *      std::vector<decltype(str.begin())> results;
+            trl::find_all_of(str.begin(),str.end(), src.begin(), src.end(), std::back_inserter(results), [](const char& a, const char& b) { return a == b; });
+     *   @endcode
+     * @tparam ForwardIt1 The type of the input iterator parameters. ForwardIt1 will be auto-deducted by the compiler.
+     * @tparam ForwardIt2 The type of the search iterator parameters. ForwardIt2 will be auto-deducted by the compiler.
+     * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
+     * @tparam BinaryPredicate A binary predicate which returns ​true if the elements should be treated as equal.
+     * @param first The first element in the range to examine.
+     * @param last One element beyond the last element in the range to examine.
+     * @param s_first The first element in the search range.
+     * @param s_last The last element in the search range.
+     * @param d_first An output iterator pointing to the first element to fill in the output container.
+     * @param p A binary predicate which returns ​true if the elements should be treated as equal.
+     * @return An output iterator pointing to one element beyond the last element of the output container.
+     * @throws Undefined find_all itself does not throw. However, std::find is not marked noexcept, so it might throw,
+     * but documentation does not reveal any details.
      */
     template<typename ForwardIt1, typename ForwardIt2, typename OutputIt, typename BinaryPredicate>
     OutputIt find_all_of(ForwardIt1 first,
@@ -522,20 +542,33 @@ namespace trl
     }
 
     /**
-     * @brief
-     * @tparam ExecutionPolicy
-     * @tparam ForwardIt1
-     * @tparam ForwardIt2
-     * @tparam OutputIt
-     * @tparam BinaryPredicate
-     * @param policy
-     * @param first
-     * @param last
-     * @param s_first
-     * @param s_last
-     * @param d_first
-     * @param p
-     * @return
+     * @brief Finds all elements of a given range of value in a container, in the range [first, last), using a predicate.
+     * @details This algorithm is a wrapper around the std::find_first_of algorithm. It simply calls std::find_first_of
+     * on the provided container, until all elements have been found, or until the last element has been reached.
+     * #### Example
+     * The following example will find all occurrences of the letters {'A', 'B'} in a given string. It will find eight items at
+     * position 0, 1, 6, 7, 8, 9, 14 and 15. Iterators to those elements will be copied to the results vector.
+     *   @code{.cpp}
+     *      auto str = std::string("ABCDDCBAABCDDCBAX");
+     *      auto src = std::string("AB");
+     *      std::vector<decltype(str.begin())> results;
+            trl::find_all_of(std::execution::par, str.begin(),str.end(), src.begin(), src.end(), std::back_inserter(results), [](const char& a, const char& b) { return a == b; });
+     *   @endcode
+     * @tparam ExecutionPolicy The execution policy to use. ExecutionPolicy will be auto-deduced by the compiler.
+     * @tparam ForwardIt1 The type of the input iterator parameters. ForwardIt1 will be auto-deducted by the compiler.
+     * @tparam ForwardIt2 The type of the search iterator parameters. ForwardIt2 will be auto-deducted by the compiler.
+     * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
+     * @tparam BinaryPredicate A binary predicate which returns ​true if the elements should be treated as equal.
+     * @param policy The execution policy to use, e.g. std::execution::par.
+     * @param first The first element in the range to examine.
+     * @param last One element beyond the last element in the range to examine.
+     * @param s_first The first element in the search range.
+     * @param s_last The last element in the search range.
+     * @param d_first An output iterator pointing to the first element to fill in the output container.
+     * @param p A binary predicate which returns ​true if the elements should be treated as equal.
+     * @return An output iterator pointing to one element beyond the last element of the output container.
+     * @throws Undefined find_all itself does not throw. However, std::find is not marked noexcept, so it might throw,
+     * but documentation does not reveal any details.
      */
     template<typename ExecutionPolicy, typename ForwardIt1, typename ForwardIt2, typename OutputIt, typename BinaryPredicate>
     OutputIt find_all_of(ExecutionPolicy policy,
@@ -557,16 +590,29 @@ namespace trl
     }
 
     /**
-     * @brief
-     * @tparam ForwardIt1
-     * @tparam ForwardIt2
-     * @tparam OutputIt
-     * @param first
-     * @param last
-     * @param s_first
-     * @param s_last
-     * @param d_first
-     * @return
+     * @brief Finds all elements NOT in a given range of values in a container, in the range [first, last).
+     * @details This algorithm is a wrapper around the trl::find_first_not_of algorithm. It simply calls trl::find_first_not_of
+     * on the provided container, until all elements have been found, or until the last element has been reached.
+     * #### Example
+     * The following example will find all occurrences NOT equal to the letters {'A', 'B'} in a given string. It will find
+     * nine items at position 2,3,4,5,10,11,12,13 and 16. Iterators to those elements will be copied to the results vector.
+     *   @code{.cpp}
+     *      auto str = std::string("ABCDDCBAABCDDCBAX");
+     *      auto src = std::string("AB");
+     *      std::vector<decltype(str.begin())> results;
+            trl::find_all_of(std::execution::par, str.begin(),str.end(), src.begin(), src.end(), std::back_inserter(results));
+     *   @endcode
+     * @tparam ForwardIt1 The type of the input iterator parameters. ForwardIt1 will be auto-deducted by the compiler.
+     * @tparam ForwardIt2 The type of the search iterator parameters. ForwardIt2 will be auto-deducted by the compiler.
+     * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
+     * @param first The first element in the range to examine.
+     * @param last One element beyond the last element in the range to examine.
+     * @param s_first The first element in the search range.
+     * @param s_last The last element in the search range.
+     * @param d_first An output iterator pointing to the first element to fill in the output container.
+     * @return An output iterator pointing to one element beyond the last element of the output container.
+     * @throws Undefined find_all itself does not throw. However, std::find is not marked noexcept, so it might throw,
+     * but documentation does not reveal any details.
      */
     template<typename ForwardIt1, typename ForwardIt2, typename OutputIt>
     OutputIt find_all_not_of(ForwardIt1 first,
@@ -586,16 +632,76 @@ namespace trl
     }
 
     /**
-     * @brief
-     * @tparam ForwardIt1
-     * @tparam ForwardIt2
-     * @tparam OutputIt
-     * @param first
-     * @param last
-     * @param s_first
-     * @param s_last
-     * @param d_first
-     * @return
+     * @brief Finds all elements NOT in a given range of values in a container, in the range [first, last), using an execution policy.
+     * @details This algorithm is a wrapper around the trl::find_first_not_of algorithm. It simply calls trl::find_first_not_of
+     * on the provided container, until all elements have been found, or until the last element has been reached.
+     * #### Example
+     * The following example will find all occurrences NOT equal to the letters {'A', 'B'} in a given string. It will find
+     * nine items at position 2,3,4,5,10,11,12,13 and 16. Iterators to those elements will be copied to the results vector.
+     *   @code{.cpp}
+     *      auto str = std::string("ABCDDCBAABCDDCBAX");
+     *      auto src = std::string("AB");
+     *      std::vector<decltype(str.begin())> results;
+            trl::find_all_of(std::execution::par, str.begin(),str.end(), src.begin(), src.end(), std::back_inserter(results));
+     *   @endcode
+     * @tparam ExecutionPolicy The execution policy to use. ExecutionPolicy will be auto-deduced by the compiler.
+     * @tparam ForwardIt1 The type of the input iterator parameters. ForwardIt1 will be auto-deducted by the compiler.
+     * @tparam ForwardIt2 The type of the search iterator parameters. ForwardIt2 will be auto-deducted by the compiler.
+     * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
+     * @param policy The execution policy to use, e.g. std::execution::par.
+     * @param first The first element in the range to examine.
+     * @param last One element beyond the last element in the range to examine.
+     * @param s_first The first element in the search range.
+     * @param s_last The last element in the search range.
+     * @param d_first An output iterator pointing to the first element to fill in the output container.
+     * @return An output iterator pointing to one element beyond the last element of the output container.
+     * @throws Undefined find_all itself does not throw. However, std::find is not marked noexcept, so it might throw,
+     * but documentation does not reveal any details.
+     */
+    template<typename ExecutionPolicy, typename ForwardIt1, typename ForwardIt2, typename OutputIt>
+    OutputIt find_all_not_of(ExecutionPolicy&& policy,
+                             ForwardIt1 first,
+                             ForwardIt1 last,
+                             ForwardIt2 s_first,
+                             ForwardIt2 s_last,
+                             OutputIt d_first) {
+        while (first != last) {
+            first = find_first_not_of(policy, first, last, s_first, s_last);
+            if (first != last) {
+                *(d_first++) = first;
+                first++;
+            }
+        }
+
+        return d_first;
+    }
+
+    // TODO: Implement trl::find_all_not_of with predicates
+
+    /**
+     * @brief Search for all occurrences of a sequence of values in a container, in the range [first, last).
+     * @details This algorithm is a wrapper around the std::search algorithm. It simply calls std::search
+     * on the provided container, until all occurrences have been found, or until the last element has been reached.
+     * #### Example
+     * The following example will find all occurrences of the sequence "HELLO" in a given string. It will find
+     * two items at position 2 and 9. Iterators to those elements will be copied to the results vector.
+     *   @code{.cpp}
+     *      auto str = std::string("ABHELLOAAHELLOBAX");
+     *      auto src = std::string("HELLO");
+     *      std::vector<decltype(str.begin())> results;
+            trl::find_all_of(str.begin(),str.end(), src.begin(), src.end(), std::back_inserter(results));
+     *   @endcode
+     * @tparam ForwardIt1 The type of the input iterator parameters. ForwardIt1 will be auto-deducted by the compiler.
+     * @tparam ForwardIt2 The type of the search iterator parameters. ForwardIt2 will be auto-deducted by the compiler.
+     * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
+     * @param first The first element in the range to examine.
+     * @param last One element beyond the last element in the range to examine.
+     * @param s_first The first element in the search range.
+     * @param s_last The last element in the search range.
+     * @param d_first An output iterator pointing to the first element to fill in the output container.
+     * @return An output iterator pointing to one element beyond the last element of the output container.
+     * @throws Undefined find_all itself does not throw. However, std::find is not marked noexcept, so it might throw,
+     * but documentation does not reveal any details.
      */
     template<typename ForwardIt1, typename ForwardIt2, typename OutputIt>
     OutputIt search_all(ForwardIt1 first,
@@ -615,18 +721,76 @@ namespace trl
     }
 
     /**
-     * @brief
-     * @tparam ForwardIt1
-     * @tparam ForwardIt2
-     * @tparam OutputIt
-     * @tparam BinaryPredicate
-     * @param first
-     * @param last
-     * @param s_first
-     * @param s_last
-     * @param d_first
-     * @param p
-     * @return
+     * @brief Search for all occurrences of a sequence of values in a container, in the range [first, last), using an execution policy.
+     * @details This algorithm is a wrapper around the std::search algorithm. It simply calls std::search
+     * on the provided container, until all occurrences have been found, or until the last element has been reached.
+     * #### Example
+     * The following example will find all occurrences of the sequence "HELLO" in a given string. It will find
+     * two items at position 2 and 9. Iterators to those elements will be copied to the results vector.
+     *   @code{.cpp}
+     *      auto str = std::string("ABHELLOAAHELLOBAX");
+     *      auto src = std::string("HELLO");
+     *      std::vector<decltype(str.begin())> results;
+            trl::find_all_of(std::execution::par, str.begin(),str.end(), src.begin(), src.end(), std::back_inserter(results));
+     *   @endcode
+     * @tparam ExecutionPolicy The execution policy to use. ExecutionPolicy will be auto-deduced by the compiler.
+     * @tparam ForwardIt1 The type of the input iterator parameters. ForwardIt1 will be auto-deducted by the compiler.
+     * @tparam ForwardIt2 The type of the search iterator parameters. ForwardIt2 will be auto-deducted by the compiler.
+     * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
+     * @param policy The execution policy to use, e.g. std::execution::par.
+     * @param first The first element in the range to examine.
+     * @param last One element beyond the last element in the range to examine.
+     * @param s_first The first element in the search range.
+     * @param s_last The last element in the search range.
+     * @param d_first An output iterator pointing to the first element to fill in the output container.
+     * @return An output iterator pointing to one element beyond the last element of the output container.
+     * @throws Undefined find_all itself does not throw. However, std::find is not marked noexcept, so it might throw,
+     * but documentation does not reveal any details.
+     */
+    template<typename ExecutionPolicy, typename ForwardIt1, typename ForwardIt2, typename OutputIt>
+    OutputIt search_all(ExecutionPolicy&& policy,
+                        ForwardIt1 first,
+                        ForwardIt1 last,
+                        ForwardIt2 s_first,
+                        ForwardIt2 s_last,
+                        OutputIt d_first) {
+        while (first != last) {
+            first = std::search(policy, first, last, s_first, s_last);
+            if (first != last) {
+                *(d_first++) = first;
+                first++;
+            }
+        }
+
+        return d_first;
+    }
+
+    /**
+     * @brief Search for all occurrences of a sequence of values in a container, in the range [first, last), using a predicate.
+     * @details This algorithm is a wrapper around the std::search algorithm. It simply calls std::search
+     * on the provided container, until all occurrences have been found, or until the last element has been reached.
+     * #### Example
+     * The following example will find all occurrences of the sequence "HELLO" in a given string. It will find
+     * two items at position 2 and 9. Iterators to those elements will be copied to the results vector.
+     *   @code{.cpp}
+     *      auto str = std::string("ABHELLOAAHELLOBAX");
+     *      auto src = std::string("HELLO");
+     *      std::vector<decltype(str.begin())> results;
+            trl::find_all_of(str.begin(),str.end(), src.begin(), src.end(), std::back_inserter(results), [&](const char& a, const char& b) { return a == b; });
+     *   @endcode
+     * @tparam ForwardIt1 The type of the input iterator parameters. ForwardIt1 will be auto-deducted by the compiler.
+     * @tparam ForwardIt2 The type of the search iterator parameters. ForwardIt2 will be auto-deducted by the compiler.
+     * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
+     * @tparam BinaryPredicate A binary predicate which returns ​true if the elements should be treated as equal.
+     * @param first The first element in the range to examine.
+     * @param last One element beyond the last element in the range to examine.
+     * @param s_first The first element in the search range.
+     * @param s_last The last element in the search range.
+     * @param d_first An output iterator pointing to the first element to fill in the output container.
+     * @param p A binary predicate which returns ​true if the elements should be treated as equal.
+     * @return An output iterator pointing to one element beyond the last element of the output container.
+     * @throws Undefined find_all itself does not throw. However, std::find is not marked noexcept, so it might throw,
+     * but documentation does not reveal any details.
      */
     template<typename ForwardIt1, typename ForwardIt2, typename OutputIt, typename BinaryPredicate>
     OutputIt search_all(ForwardIt1 first,
@@ -645,6 +809,57 @@ namespace trl
 
         return d_first;
     }
+
+    /**
+     * @brief Search for all occurrences of a sequence of values in a container, in the range [first, last), using a predicate
+     * and an execution policy.
+     * @details This algorithm is a wrapper around the std::search algorithm. It simply calls std::search
+     * on the provided container, until all occurrences have been found, or until the last element has been reached.
+     * #### Example
+     * The following example will find all occurrences of the sequence "HELLO" in a given string. It will find
+     * two items at position 2 and 9. Iterators to those elements will be copied to the results vector.
+     *   @code{.cpp}
+     *      auto str = std::string("ABHELLOAAHELLOBAX");
+     *      auto src = std::string("HELLO");
+     *      std::vector<decltype(str.begin())> results;
+            trl::find_all_of(std::execution::par, str.begin(),str.end(), src.begin(), src.end(), std::back_inserter(results), [&](const char& a, const char& b) { return a == b; });
+     *   @endcode
+     * @tparam ExecutionPolicy The execution policy to use. ExecutionPolicy will be auto-deduced by the compiler.
+     * @tparam ForwardIt1 The type of the input iterator parameters. ForwardIt1 will be auto-deducted by the compiler.
+     * @tparam ForwardIt2 The type of the search iterator parameters. ForwardIt2 will be auto-deducted by the compiler.
+     * @tparam OutputIt The type of the output iterator of the output container. OutputIt will be auto-deducted by the compiler.
+     * @tparam BinaryPredicate A binary predicate which returns ​true if the elements should be treated as equal.
+     * @param policy The execution policy to use, e.g. std::execution::par.
+     * @param first The first element in the range to examine.
+     * @param last One element beyond the last element in the range to examine.
+     * @param s_first The first element in the search range.
+     * @param s_last The last element in the search range.
+     * @param d_first An output iterator pointing to the first element to fill in the output container.
+     * @param p A binary predicate which returns ​true if the elements should be treated as equal.
+     * @return An output iterator pointing to one element beyond the last element of the output container.
+     * @throws Undefined find_all itself does not throw. However, std::find is not marked noexcept, so it might throw,
+     * but documentation does not reveal any details.
+     */
+    template<typename ExecutionPolicy, typename ForwardIt1, typename ForwardIt2, typename OutputIt, typename BinaryPredicate>
+    OutputIt search_all(ExecutionPolicy&& policy,
+                        ForwardIt1 first,
+                        ForwardIt1 last,
+                        ForwardIt2 s_first,
+                        ForwardIt2 s_last,
+                        OutputIt d_first,
+                        BinaryPredicate p) {
+        while (first != last) {
+            first = std::search(policy, first, last, s_first, s_last, p);
+            if (first != last) {
+                *(d_first++) = first;
+                first++;
+            }
+        }
+
+        return d_first;
+    }
+
+    // TODO: Implement trl::search_all with option for using different searchers (see: https://en.cppreference.com/w/cpp/algorithm/search)
 
     // ===== SPLITTING ALGORITHM
 
@@ -803,12 +1018,12 @@ namespace trl
 
     /**
      * @brief
-     * @tparam SequenceType
+     * @tparam Container
+     * @tparam OutputIt
      * @tparam DelimiterType
-     * @tparam ContainerType
-     * @param sequence
-     * @param delimiter
+     * @param container
      * @param destination
+     * @param delimiter
      */
     template<typename Container, typename OutputIt, typename DelimiterType>
     void split(Container container,

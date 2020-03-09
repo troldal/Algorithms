@@ -14,7 +14,10 @@ target_sources(TroldalgoTestSuite
         test_find_all_if.cpp
         test_find_all_if_not.cpp
         test_find_first_not_of.cpp
-        test_find_all_of.cpp)
+        test_find_all_of.cpp
+        test_find_all_not_of.cpp
+        test_search_all.cpp
+        test_split.cpp)
 
 target_link_libraries(TroldalgoTestSuite PRIVATE ${TBB_LIBRARIES} Catch Algorithms)
 
@@ -26,16 +29,19 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Inte
 
     if(${RUN_PARALLEL_TESTS})
         target_compile_definitions(TroldalgoTestSuite PRIVATE PARALLEL_ENABLED)
-        if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+
+        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             find_package(TBB REQUIRED)
             target_include_directories(TroldalgoTestSuite PRIVATE ${TBB_INCLUDE_DIRS})
             target_link_libraries(TroldalgoTestSuite PRIVATE ${TBB_LIBRARIES})
-        endif()
+        endif () # CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
 
-        if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
             target_compile_definitions(TroldalgoTestSuite PRIVATE _ENABLE_ATOMIC_ALIGNMENT_FIX)
-        endif()
-    endif()
+        endif () # CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
+
+    endif () # ${RUN_PARALLEL_TESTS}
+
 endif()
 
 #=======================================================================================================================

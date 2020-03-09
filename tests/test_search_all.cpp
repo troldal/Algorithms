@@ -18,20 +18,17 @@
  * Test: trl::find_all_of
  *
  * Description: Test the behaviour of the trl::find_all_of algorithm. The purpose of the find_all_of algorithm is to
- * find all elements in a collection that matches a certain criterion. Tests using both std::string, std::vector, std::deque,
- * std::array, std::multiset, std::unordered_multiset are included.
+ * find all elements in a collection that matches a certain criterion. Tests using both std::string, std::vector, std::deque
  * are included.
  */
-TEMPLATE_TEST_CASE("Find all elements matching a criterion in a collection of characters using find_all_of",
-                   "[find_all_of]",
+TEMPLATE_TEST_CASE("Search for all sequences of elements in a collection of characters using search_all",
+                   "[search_all]",
                    (std::string),
                    (std::vector<char>),
-                   (std::deque<char>),
-                   (std::multiset<char>),
-                   (std::unordered_multiset<char>)) {
+                   (std::deque<char>)) {
 
     // ===== Load test case definitions
-    auto cases = create_find_all_of_cases();
+    auto cases = create_search_all_cases();
 
     // ===== Iterate through the test cases
     for (auto testcase : cases) {
@@ -46,7 +43,8 @@ TEMPLATE_TEST_CASE("Find all elements matching a criterion in a collection of ch
 
             // ===== Run the find_all_if algorithm and check that the number of found elements are correct.
             std::vector<decltype(container.begin())> results;
-            trl::find_all_of(container.begin(), container.end(), testcase.search_item.begin(), testcase.search_item.end(), std::back_inserter(results));
+            trl::search_all(container.begin(), container.end(), testcase.search_item.begin(),
+                            testcase.search_item.end(), std::back_inserter(results));
             REQUIRE(results.size() == testcase.item_locations.size());
 
             // ===== Check each found element that it has the right value and the right positions (only possible for
@@ -66,7 +64,7 @@ TEMPLATE_TEST_CASE("Find all elements matching a criterion in a collection of ch
 
             // ===== Run the find_all_if algorithm and check that the number of found elements are correct.
             std::vector<decltype(container.begin())> results;
-            trl::find_all_of(
+            trl::search_all(
                     container.begin(),
                     container.end(),
                     testcase.search_item.begin(),
@@ -96,7 +94,7 @@ TEMPLATE_TEST_CASE("Find all elements matching a criterion in a collection of ch
 
         // ===== Run the find_all_if algorithm and check that the number of found elements are correct.
         std::vector<decltype(container.begin())> results;
-        trl::find_all_of(std::execution::seq, container.begin(), container.end(), testcase.search_item.begin(), testcase.search_item.end(), std::back_inserter(results));
+        trl::search_all(std::execution::seq, container.begin(), container.end(), testcase.search_item.begin(), testcase.search_item.end(), std::back_inserter(results));
         REQUIRE(results.size() == testcase.item_locations.size());
 
         // ===== Check each found element that it has the right value and the right positions (only possible for
@@ -115,12 +113,12 @@ TEMPLATE_TEST_CASE("Find all elements matching a criterion in a collection of ch
 
         // ===== Run the find_all_if algorithm and check that the number of found elements are correct.
         std::vector<decltype(container.begin())> results;
-        trl::find_all_of(std::execution::seq,
-                container.begin(),
-                container.end(),
-                testcase.search_item.begin(),
-                testcase.search_item.end(),
-                std::back_inserter(results),
+        trl::search_all(std::execution::seq,
+                         container.begin(),
+                         container.end(),
+                         testcase.search_item.begin(),
+                         testcase.search_item.end(),
+                         std::back_inserter(results),
                          [&](const char& a, const char& b) { return a == b; });
         REQUIRE(results.size() == testcase.item_locations.size());
 
