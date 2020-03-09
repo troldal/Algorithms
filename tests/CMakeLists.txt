@@ -31,6 +31,10 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Inte
             target_include_directories(TroldalgoTestSuite PRIVATE ${TBB_INCLUDE_DIRS})
             target_link_libraries(TroldalgoTestSuite PRIVATE ${TBB_LIBRARIES})
         endif()
+
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+            target_compile_definitions(TroldalgoTestSuite PRIVATE _ENABLE_ATOMIC_ALIGNMENT_FIX)
+        endif()
     endif()
 endif()
 
@@ -105,8 +109,8 @@ endif ()
 # Enable code sanitizers
 #=======================================================================================================================
 if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))
-    target_compile_options(TroldalgoTestSuite PRIVATE -g -fno-omit-frame-pointer -fsanitize=undefined) #,nullability,implicit-conversion,integer,float-divide-by-zero)
-    target_link_options(TroldalgoTestSuite PRIVATE -fno-omit-frame-pointer -fsanitize=undefined) #,nullability,implicit-conversion,integer,float-divide-by-zero)
+    #target_compile_options(TroldalgoTestSuite PRIVATE -g -fno-omit-frame-pointer -fsanitize=undefined) #,nullability,implicit-conversion,integer,float-divide-by-zero)
+    #target_link_options(TroldalgoTestSuite PRIVATE -fno-omit-frame-pointer -fsanitize=undefined) #,nullability,implicit-conversion,integer,float-divide-by-zero)
 endif ()
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fno-omit-frame-pointer -fsanitize=leak")
