@@ -8,17 +8,7 @@ target_include_directories(Catch SYSTEM INTERFACE ${CMAKE_CURRENT_LIST_DIR}/catc
 # Define TEST target
 #=======================================================================================================================
 add_executable(TroldalgoTestSuite "")
-target_sources(TroldalgoTestSuite
-        PRIVATE
-        test_find_all.cpp
-        test_find_all_if.cpp
-        test_find_all_if_not.cpp
-        test_find_first_not_of.cpp
-        test_find_all_of.cpp
-        test_find_all_not_of.cpp
-        test_search_all.cpp
-        test_split.cpp)
-
+target_sources(TroldalgoTestSuite PRIVATE main.cpp)
 target_link_libraries(TroldalgoTestSuite PRIVATE ${TBB_LIBRARIES} Catch Algorithms)
 
 #=======================================================================================================================
