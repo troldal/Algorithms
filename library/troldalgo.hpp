@@ -679,7 +679,7 @@ namespace trl
     // TODO: Implement trl::find_all_not_of with predicates
 
     /**
-     * @brief Search for all occurrences of a sequence of values in a container, in the range [first, last).
+     * @brief Search for all non-overlapping occurrences of a sequence of values in a container, in the range [first, last).
      * @details This algorithm is a wrapper around the std::search algorithm. It simply calls std::search
      * on the provided container, until all occurrences have been found, or until the last element has been reached.
      * #### Example
@@ -713,7 +713,7 @@ namespace trl
             first = std::search(first, last, s_first, s_last);
             if (first != last) {
                 *(d_first++) = first;
-                first++;
+                std::advance(first, std::distance(s_first, s_last));
             }
         }
 
@@ -721,7 +721,7 @@ namespace trl
     }
 
     /**
-     * @brief Search for all occurrences of a sequence of values in a container, in the range [first, last), using an execution policy.
+     * @brief Search for all non-overlapping occurrences of a sequence of values in a container, in the range [first, last), using an execution policy.
      * @details This algorithm is a wrapper around the std::search algorithm. It simply calls std::search
      * on the provided container, until all occurrences have been found, or until the last element has been reached.
      * #### Example
@@ -758,7 +758,7 @@ namespace trl
             first = std::search(policy, first, last, s_first, s_last);
             if (first != last) {
                 *(d_first++) = first;
-                first++;
+                std::advance(first, std::distance(s_first, s_last));
             }
         }
 
@@ -766,7 +766,7 @@ namespace trl
     }
 
     /**
-     * @brief Search for all occurrences of a sequence of values in a container, in the range [first, last), using a predicate.
+     * @brief Search for all non-overlapping occurrences of a sequence of values in a container, in the range [first, last), using a predicate.
      * @details This algorithm is a wrapper around the std::search algorithm. It simply calls std::search
      * on the provided container, until all occurrences have been found, or until the last element has been reached.
      * #### Example
@@ -803,7 +803,7 @@ namespace trl
             first = std::search(first, last, s_first, s_last, p);
             if (first != last) {
                 *(d_first++) = first;
-                first++;
+                std::advance(first, std::distance(s_first, s_last));
             }
         }
 
@@ -811,7 +811,7 @@ namespace trl
     }
 
     /**
-     * @brief Search for all occurrences of a sequence of values in a container, in the range [first, last), using a predicate
+     * @brief Search for all non-overlapping occurrences of a sequence of values in a container, in the range [first, last), using a predicate
      * and an execution policy.
      * @details This algorithm is a wrapper around the std::search algorithm. It simply calls std::search
      * on the provided container, until all occurrences have been found, or until the last element has been reached.
@@ -852,7 +852,7 @@ namespace trl
             first = std::search(policy, first, last, s_first, s_last, p);
             if (first != last) {
                 *(d_first++) = first;
-                first++;
+                std::advance(first, std::distance(s_first, s_last));
             }
         }
 
@@ -937,7 +937,7 @@ namespace trl
         }
 
         constexpr size_t Length() const {
-            return m_sequence.length();
+            return m_sequence.size();
         }
 
     private:
@@ -1000,11 +1000,10 @@ namespace trl
 
             std::vector<RandomAccessIter> locations;
             while (std::distance(begin, end) > m_length) {
-                begin += m_length;
+                std::advance(begin, m_length);
                 locations.emplace_back(begin);
             }
 
-            if (begin != end) locations.emplace_back(end);
             return locations;
         }
 
@@ -1017,13 +1016,13 @@ namespace trl
     };
 
     /**
-     * @brief
-     * @tparam Container
-     * @tparam OutputIt
-     * @tparam DelimiterType
-     * @param container
-     * @param destination
-     * @param delimiter
+     * @brief Split a container into sub-containers, using a given delimiter
+     * @tparam Container The container type to be split. This will be auto-deduced by the compiler.
+     * @tparam OutputIt The type of output iterator used for output of sub-containers. This will be auto-deduced by the compiler.
+     * @tparam DelimiterType The type of delimiter. This will be auto-deduced by the compiler.
+     * @param container The container to split.
+     * @param destination An output iterator to the destination container.
+     * @param delimiter The delimiter object to use.
      */
     template<typename Container, typename OutputIt, typename DelimiterType>
     void split(Container container,
@@ -1034,6 +1033,8 @@ namespace trl
                       "Input container is not sequential!");
 
         auto locations = delimiter.Find(container.begin(), container.end());
+        *std::back_inserter(locations) = container.end();
+
         auto first = container.begin();
 
         for (auto last : locations) {

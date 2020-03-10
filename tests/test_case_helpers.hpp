@@ -265,10 +265,66 @@ inline auto create_find_all_not_of_cases() {
 inline auto create_search_all_cases() {
 
     CCaseDef2<char> CaseDef1;
-    CaseDef1.case_title     = "Find all sequences == 'HELLO' in the container";
+    CaseDef1.case_title     = "Find all sequences == 'HELLO' in the container 1";
     CaseDef1.array          = {'H', 'E', 'L', 'L', 'O', 'C', 'B', 'H', 'E', 'L', 'L', 'O', 'D', 'C', 'B', 'A', 'X'};
     CaseDef1.search_item    = {'H', 'E', 'L', 'L', 'O'};
     CaseDef1.item_locations = {0, 7};
+
+    CCaseDef2<char> CaseDef2;
+    CaseDef2.case_title     = "Find all sequences == 'HELLO' in the container 2";
+    CaseDef2.array          = {'A', 'B', 'H', 'E', 'L', 'L', 'O', 'A', 'A', 'B', 'C', 'D', 'H', 'E', 'L', 'L', 'O'};
+    CaseDef2.search_item    = {'H', 'E', 'L', 'L', 'O'};
+    CaseDef2.item_locations = {2, 12};
+
+    CCaseDef2<char> CaseDef3;
+    CaseDef3.case_title     = "Find all sequences == 'HELLO' in the container 3";
+    CaseDef3.array          = {'A', 'B', 'C', 'H', 'E', 'L', 'L', 'O', 'H', 'E', 'L', 'L', 'O', 'C', 'B', 'A', 'X'};
+    CaseDef3.search_item    = {'H', 'E', 'L', 'L', 'O'};
+    CaseDef3.item_locations = {3, 8};
+
+    CCaseDef2<char> CaseDef4;
+    CaseDef4.case_title     = "Find all sequences == 'HELLO' in the container 4";
+    CaseDef4.array          = {'A', 'B', 'C', 'H', 'E', 'L', 'L', 'H', 'E', 'L', 'L', 'O', 'D', 'H', 'E', 'L', 'L'};
+    CaseDef4.search_item    = {'H', 'E', 'L', 'L', 'O'};
+    CaseDef4.item_locations = {7};
+
+    CCaseDef2<char> CaseDef5;
+    CaseDef5.case_title     = "Find all sequences == '##' in the container 5";
+    CaseDef5.array          = {'#', '#', 'C', 'D', 'D', '#', '#', '#', '#', 'B', 'C', 'D', '#', '#', 'B', '#', '#'};
+    CaseDef5.search_item    = {'#', '#'};
+    CaseDef5.item_locations = {0, 5, 7, 12, 15};
+
+    CCaseDef2<char> CaseDef6;
+    CaseDef6.case_title     = "Find all sequences == 'HELLO' in the container 6";
+    CaseDef6.array          = {'A', 'B', 'C', 'D', 'D', 'C', 'B', 'A', 'A', 'B', 'C', 'D', 'D', 'C', 'B', 'A', 'X'};
+    CaseDef6.search_item    = {'H', 'E', 'L', 'L', 'O'};
+    CaseDef6.item_locations = {};
+
+    CCaseDef2<char> CaseDef7;
+    CaseDef7.case_title     = "Find all sequences == 'HELLO' in the container 7";
+    CaseDef7.array          = {};
+    CaseDef7.search_item    = {'H', 'E', 'L', 'L', 'O'};
+    CaseDef7.item_locations = {};
+
+    std::vector<CCaseDef2<char>> cases;
+    cases.emplace_back(CaseDef1);
+    cases.emplace_back(CaseDef2);
+    cases.emplace_back(CaseDef3);
+    cases.emplace_back(CaseDef4);
+    cases.emplace_back(CaseDef5);
+    cases.emplace_back(CaseDef6);
+    cases.emplace_back(CaseDef7);
+
+    return cases;
+}
+
+inline auto create_split_cases() {
+
+    CCaseDef2<char> CaseDef1;
+    CaseDef1.case_title     = "Find all sequences == 'HELLO' in the container";
+    CaseDef1.array          = {'H', 'E', 'L', 'L', 'O', ';', 'H', 'E', 'L', 'L', 'O', ';', 'H', 'E', 'L', 'L', 'O'};
+    CaseDef1.search_item    = {';'};
+    CaseDef1.item_locations = {3};
 
     CCaseDef2<char> CaseDef2;
     CaseDef2.case_title     = "Find all char != 'B' in the container";
