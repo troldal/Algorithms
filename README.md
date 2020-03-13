@@ -4,6 +4,13 @@ Troldalgo is a collection of useful algorithms not present in the C++ Standard L
 ## Table of Contents
 * [Motivation](#Motivation)
 * [Generic Algorithms](#Generic-Algorithms)
+    * [trl::find_first_not_of](#trlfind_first_not_of)
+    * [trl::find_all](#trlfind_all)
+    * [trl::find_all_if](#trlfind_all_if)
+    * [trl::find_all_if_not](#trlfind_all_if_not)
+    * [trl::find_all_of](#trlfind_all_of)
+    * [trl::find_all_not_of](#trlfind_all_not_of)
+    * [trl::search_all](#trlsearch_all)
 * [Special Purpose Algorithms](#Special-Purpose-Algorithms)
 * [Parallel Algorithms](#Parallel-Algorithms)
 * [Setup](#Setup)
@@ -61,7 +68,7 @@ int main() {
 
 ### trl::find_all_of
 
-### trl::find all_not_of
+### trl::find_all_not_of
 
 ### trl::search_all
 
