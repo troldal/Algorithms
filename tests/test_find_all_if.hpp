@@ -7,11 +7,6 @@
 #include <unordered_set>
 #include <type_traits>
 
-#ifdef PARALLEL_ENABLED
-#include <execution>
-
-#endif
-
 #include "test_case_helpers.hpp"
 
 /*
@@ -61,29 +56,5 @@ TEMPLATE_TEST_CASE("Find all elements matching a criterion in a collection of ch
                 REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
             }
         }
-
-#ifdef PARALLEL_ENABLED
-            // ===== Run tests for the current case definition in parallel mode
-        SECTION(testcase.case_title + " (Parallel)") {
-
-            // ===== Run the find_all_if algorithm and check that the number of found elements are correct.
-            std::vector<decltype(container.begin())> results;
-            trl::find_all_if(std::execution::seq, container.begin(), container.end(), std::back_inserter(results),
-                             [&](char c) {
-                                 return c == testcase.search_item;
-                             });
-            REQUIRE(results.size() == testcase.item_locations.size());
-
-            // ===== Check each found element that it has the right value and the right positions (only possible for
-            // ===== random access iterators). Also chech that there are no duplicates amongst the found elements.
-            for (int it = 0; it < results.size(); ++it) {
-                if constexpr (trl::IsRandomAccessIterator<typename TestType::iterator>::value) {
-                    REQUIRE(std::distance(container.begin(), results[it]) == testcase.item_locations[it]);
-                }
-                REQUIRE(*results[it] == testcase.search_item);
-                REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
-            }
-        }
-#endif
     }
 }

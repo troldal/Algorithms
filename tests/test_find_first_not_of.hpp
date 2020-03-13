@@ -6,9 +6,6 @@
 #include <set>
 #include <unordered_set>
 #include <type_traits>
-#ifdef PARALLEL_ENABLED
-#include <execution>
-#endif
 
 #include "test_case_helpers.hpp"
 
@@ -50,21 +47,5 @@ TEMPLATE_TEST_CASE("Find first element NOT matching a criterion in a collection 
                 REQUIRE(std::find(testcase.search_item.begin(), testcase.search_item.end(), *result) == testcase.search_item.end());
             }
         }
-
-#ifdef PARALLEL_ENABLED
-        SECTION(testcase.case_title + " (Parallel)") {
-            auto result = trl::find_first_not_of(std::execution::seq, container.begin(), container.end(), testcase.search_item.begin(), testcase.search_item.end());
-
-            if (testcase.item_locations.size() == 0)
-                REQUIRE(result == container.end());
-            else {
-                REQUIRE(result != container.end());
-                if constexpr (trl::IsRandomAccessIterator<typename TestType::iterator>::value) {
-                    REQUIRE(std::distance(container.begin(), result) == testcase.item_locations[0]);
-                }
-                REQUIRE(std::find(testcase.search_item.begin(), testcase.search_item.end(), *result) == testcase.search_item.end());
-            }
-        }
-#endif
     }
 }

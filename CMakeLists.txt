@@ -15,12 +15,13 @@ set(PROJECT_URL "https://github.com/troldal/Algorithms")
 set(PROJECT_DESCRIPTION "A collection of useful algorithms")
 
 #=======================================================================================================================
-# Set C/C++ compiler version
+# Set C/C++ compiler settings
 #=======================================================================================================================
-set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(IGNORE_ME ${CMAKE_C_COMPILER})
+
 
 #=======================================================================================================================
 # Add build options

@@ -7,11 +7,6 @@
 #include <unordered_set>
 #include <type_traits>
 
-#ifdef PARALLEL_ENABLED
-#include <execution>
-
-#endif
-
 #include "test_case_helpers.hpp"
 
 /*
@@ -87,52 +82,5 @@ TEMPLATE_TEST_CASE("Search for all sequences of elements in a collection of char
                 REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
             }
         }
-
-#ifdef PARALLEL_ENABLED
-        // ===== Run tests for the current case definition in parallel mode
-    SECTION(testcase.case_title + " (Parallel)") {
-
-        // ===== Run the find_all_if algorithm and check that the number of found elements are correct.
-        std::vector<decltype(container.begin())> results;
-        trl::search_all(std::execution::seq, container.begin(), container.end(), testcase.search_item.begin(), testcase.search_item.end(), std::back_inserter(results));
-        REQUIRE(results.size() == testcase.item_locations.size());
-
-        // ===== Check each found element that it has the right value and the right positions (only possible for
-        // ===== random access iterators). Also chech that there are no duplicates amongst the found elements.
-        for (int it = 0; it < results.size(); ++it) {
-            if constexpr (trl::IsRandomAccessIterator<typename TestType::iterator>::value) {
-                REQUIRE(std::distance(container.begin(), results[it]) == testcase.item_locations[it]);
-            }
-            REQUIRE(std::find(testcase.search_item.begin(),testcase.search_item.end(), *results[it]) != testcase.search_item.end());
-            REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
-        }
-    }
-
-        // ===== Run tests for the current case definition in parallel mode
-    SECTION(testcase.case_title + " (Predicate + Parallel)") {
-
-        // ===== Run the find_all_if algorithm and check that the number of found elements are correct.
-        std::vector<decltype(container.begin())> results;
-        trl::search_all(std::execution::seq,
-                         container.begin(),
-                         container.end(),
-                         testcase.search_item.begin(),
-                         testcase.search_item.end(),
-                         std::back_inserter(results),
-                         [&](const char& a, const char& b) { return a == b; });
-        REQUIRE(results.size() == testcase.item_locations.size());
-
-        // ===== Check each found element that it has the right value and the right positions (only possible for
-        // ===== random access iterators). Also chech that there are no duplicates amongst the found elements.
-        for (int it = 0; it < results.size(); ++it) {
-            if constexpr (trl::IsRandomAccessIterator<typename TestType::iterator>::value) {
-                REQUIRE(std::distance(container.begin(), results[it]) == testcase.item_locations[it]);
-            }
-            REQUIRE(std::find(testcase.search_item.begin(),testcase.search_item.end(), *results[it]) != testcase.search_item.end());
-            REQUIRE(std::count(results.begin(), results.end(), results[it]) == 1);
-        }
-    }
-
-#endif
     }
 }
