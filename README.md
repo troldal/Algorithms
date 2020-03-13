@@ -4,7 +4,7 @@ Troldalgo is a collection of useful algorithms not present in the C++ Standard L
 ## Table of Contents
 * [Motivation](#Motivation)
 * [Generic Algorithms](#Generic-Algorithms)
-* [Special Purpose Algorithms](#Special-Purpose Algorithms)
+* [Special Purpose Algorithms](#Special-Purpose-Algorithms)
 * [Parallel Algorithms](#Parallel-Algorithms)
 * [Setup](#Setup)
 * [Status](#Status)
