@@ -25,6 +25,35 @@ The generic algorithms are simple, general-purpose algorithms that have been dev
 ### trl::find_first_not_of
 
 ### trl::find_all
+The trl::find_all algorithm finds elements with a certain value in a container.
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <troldalgo.hpp>
+
+int main() {
+
+    std::string src = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    std::string str;
+    auto itr = std::back_inserter(str);
+
+    for (auto i = 0; i < 1000000; ++i)
+        std::copy(src.begin(), src.end(), itr);
+
+    std::vector<decltype(str.begin())> results;
+    trl::find_all(str.begin(), str.end(), std::back_inserter(results), 'Z');
+
+    std::cout << "Size of string: " << str.size() << std::endl;
+    std::cout << "Number of Z's found: " << results.size() << std::endl;
+    std::cout << "Character at index 0: " << *results[0] << std::endl;
+    
+    return 0;
+
+}
+
+```
 
 ### trl::find_all_if
 

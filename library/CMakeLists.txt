@@ -1,9 +1,9 @@
 #=======================================================================================================================
 # Define library targets
 #=======================================================================================================================
-add_library(Algorithms INTERFACE)
-add_library(Algorithms::Algorithms ALIAS Algorithms)
-target_include_directories(Algorithms INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+add_library(Troldalgo INTERFACE)
+add_library(Troldalgo::Troldalgo ALIAS Troldalgo)
+target_include_directories(Troldalgo INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 #=======================================================================================================================
 # Install Zippy Library

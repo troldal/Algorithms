@@ -9,7 +9,7 @@ target_include_directories(Catch SYSTEM INTERFACE ${CMAKE_CURRENT_LIST_DIR}/catc
 #=======================================================================================================================
 add_executable(TroldalgoTestSuite "")
 target_sources(TroldalgoTestSuite PRIVATE main.cpp)
-target_link_libraries(TroldalgoTestSuite PRIVATE ${TBB_LIBRARIES} Catch Algorithms)
+target_link_libraries(TroldalgoTestSuite PRIVATE ${TBB_LIBRARIES} Catch Troldalgo)
 
 #=======================================================================================================================
 # Set warning flags

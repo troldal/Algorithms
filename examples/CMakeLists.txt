@@ -1,23 +1,23 @@
 #=======================================================================================================================
 # Define Example1 target
 #=======================================================================================================================
-add_executable(Example1 Example1.cpp)
-target_link_libraries(Example1 PRIVATE Algorithms)
+add_executable(example_find_all example_find_all.cpp)
+target_link_libraries(example_find_all PRIVATE Troldalgo)
 
 #=======================================================================================================================
 # Define Example2 target
 #=======================================================================================================================
 add_executable(Example2 Example2.cpp)
-target_link_libraries(Example2 PRIVATE Algorithms)
+target_link_libraries(Example2 PRIVATE Troldalgo)
 
 #=======================================================================================================================
 # Define Example3 target
 #=======================================================================================================================
 add_executable(Example3 Example3.cpp)
-target_link_libraries(Example3 PRIVATE Algorithms)
+target_link_libraries(Example3 PRIVATE Troldalgo)
 
 #=======================================================================================================================
 # Define Example3 target
 #=======================================================================================================================
 add_executable(Example4 Example4.cpp)
-target_link_libraries(Example4 PRIVATE Algorithms)
+target_link_libraries(Example4 PRIVATE Troldalgo)
