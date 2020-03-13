@@ -65,9 +65,87 @@ int main() {
 
 ### trl::find_all_if
 
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <troldalgo.hpp>
+
+int main() {
+
+    std::string src = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    std::string str;
+    auto itr = std::back_inserter(str);
+
+    for (auto i = 0; i < 1000000; ++i)
+        std::copy(src.begin(), src.end(), itr);
+
+    std::vector<decltype(str.begin())> results;
+    trl::find_all_if(str.begin(), str.end(), std::back_inserter(results), [](decltype(*str.begin()) c) {
+        return c == 'Z';
+    });
+
+    std::cout << "Size of string: " << str.size() << std::endl;
+    std::cout << "Number of Z's found: " << results.size() << std::endl;
+    std::cout << "Character at index 0: " << *results[0] << std::endl;
+}
+```
+
 ### trl::find_all_if_not
 
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <troldalgo.hpp>
+
+int main() {
+    std::string src = "AB";
+    std::string str;
+    auto itr = std::back_inserter(str);
+
+    for (auto i = 0; i < 1000000; ++i)
+        std::copy(src.begin(), src.end(), itr);
+
+    std::vector<decltype(str.begin())> results;
+    trl::find_all_if_not(str.begin(), str.end(), std::back_inserter(results), [](decltype(*str.begin()) c) {
+        return c == 'A';
+    });
+
+    std::cout << "Size of string: " << str.size() << std::endl;
+    std::cout << "Number of B's found: " << results.size() << std::endl;
+    std::cout << "Character at index 0: " << *results[0] << std::endl;
+}
+```
+
 ### trl::find_all_of
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <troldalgo.hpp>
+
+int main() {
+    std::string src = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    std::string str;
+    auto itr = std::back_inserter(str);
+
+    for (auto i = 0; i < 1000000; ++i)
+        std::copy(src.begin(), src.end(), itr);
+
+    std::string s = "AGQX";
+    std::vector<decltype(str.begin())> results;
+    trl::find_all_of(str.begin(), str.end(), s.begin(), s.end(), std::back_inserter(results));
+
+    std::cout << "Size of string: " << str.size() << std::endl;
+    std::cout << "Number of characters found: " << results.size() << std::endl;
+    std::cout << "Character at index 0: " << *results[0] << std::endl;
+    std::cout << "Character at index 1: " << *results[1] << std::endl;
+    std::cout << "Character at index 2: " << *results[2] << std::endl;
+    std::cout << "Character at index 3: " << *results[3] << std::endl;
+}
+```
 
 ### trl::find_all_not_of
 
