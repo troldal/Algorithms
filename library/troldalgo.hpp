@@ -30,18 +30,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-#ifndef TROLDALGO
-#define TROLDALGO
+#ifndef TROLDALGO_HPP
+#define TROLDALGO_HPP
 
-#include <iostream>
-#include <vector>
-#include <list>
-#include <thread>
-#include <future>
-#include <iterator>
-#include <functional>
-#include <queue>
 #include <algorithm>
+#include <functional>
+#include <future>
+#include <iostream>
+#include <iterator>
+#include <list>
+#include <queue>
+#include <thread>
+#include <vector>
 
 namespace trl
 {
@@ -207,7 +207,7 @@ namespace trl
         });
     }
 
-    // TODO: Implement trl::find_first_not_of with predicates.
+    // TODO(troldal): Implement trl::find_first_not_of with predicates.
 
 //    /**
 //     * @brief
@@ -362,7 +362,7 @@ namespace trl
         return d_first;
     }
 
-    // TODO: Implement trl::find_all_not_of with predicates
+    // TODO(troldal): Implement trl::find_all_not_of with predicates
 
     /**
      * @brief Search for all non-overlapping occurrences of a sequence of values in a container, in the range [first, last).
@@ -451,13 +451,13 @@ namespace trl
         return d_first;
     }
 
-    // TODO: Implement trl::search_all with option for using different searchers (see: https://en.cppreference.com/w/cpp/algorithm/search)
+    // TODO(troldal): Implement trl::search_all with option for using different searchers (see: https://en.cppreference.com/w/cpp/algorithm/search)
 
     // ===== SPLITTING ALGORITHM
 
     /**
-     * @brief
-     * @tparam ElemType
+     * @brief Delimiter type for splitting container into sub-sequences delimited by a sequence of elements.
+     * @tparam ElemType The type of delimiter.
      */
     template<typename ElemType>
     class ByElement
@@ -465,20 +465,20 @@ namespace trl
     public:
 
         /**
-         * @brief
-         * @param element
+         * @brief Constructor, taking a delimiter as parameter.
+         * @param element The delimiter element.
          */
         explicit ByElement(const ElemType& element) : m_element(element) {}
 
         /**
-         * @brief
-         * @tparam RandomAccessIter
-         * @param begin
-         * @param end
-         * @return
+         * @brief Method for finding the points at which to split the container.
+         * @tparam RandomAccessIter The type of container iterator.
+         * @param begin The begin iterator.
+         * @param end The end iterator.
+         * @return A std::vector with iterators one-past the place to split the container.
          */
         template<typename RandomAccessIter>
-        auto Find(RandomAccessIter begin,
+        auto find(RandomAccessIter begin,
                   RandomAccessIter end) {
 
             std::vector<RandomAccessIter> locations;
@@ -486,17 +486,26 @@ namespace trl
             return locations;
         }
 
-        constexpr size_t Length() const {
+        /**
+         * @brief Return the size of the delimiter.
+         * @return For the ByAnyElement type, the size of the delimiter is always one.
+         */
+        [[nodiscard]] constexpr int length() const {
             return 1;
         }
 
     private:
-        const ElemType& m_element;
+        const ElemType& m_element; /**< The delimiter element. */
     };
 
     /**
-     * @brief
-     * @tparam SequenceType
+     * @brief Deduction guide for ByElement delimiter class.
+     */
+    template<typename T> ByElement(std::initializer_list<T>) -> ByElement<std::vector<T>>;
+
+    /**
+     * @brief Delimiter type for splitting container into sub-sequences delimited by a sequence of elements.
+     * @tparam SequenceType The type of delimiter sequence.
      */
     template<typename SequenceType>
     class BySequence
@@ -504,8 +513,8 @@ namespace trl
     public:
 
         /**
-         * @brief
-         * @param sequence
+         * @brief Constructor, taking a delimiter sequence as parameter.
+         * @param sequence The delimiter sequence.
          */
         explicit BySequence(const SequenceType& sequence) : m_sequence(sequence) {
             static_assert(IsRandomAccessIterator<typename SequenceType::iterator>::value,
@@ -513,14 +522,14 @@ namespace trl
         }
 
         /**
-         * @brief
-         * @tparam RandomAccessIter
-         * @param begin
-         * @param end
-         * @return
+         * @brief Method for finding the points at which to split the container.
+         * @tparam RandomAccessIter The type of container iterator.
+         * @param begin The begin iterator.
+         * @param end The end iterator.
+         * @return A std::vector with iterators one-past the place to split the container.
          */
         template<typename RandomAccessIter>
-        auto Find(RandomAccessIter begin,
+        auto find(RandomAccessIter begin,
                   RandomAccessIter end) {
 
             std::vector<RandomAccessIter> locations;
@@ -528,29 +537,50 @@ namespace trl
             return locations;
         }
 
-        constexpr size_t Length() const {
-            return m_sequence.size();
+        /**
+         * @brief Return the size of the delimiter.
+         * @return For the BySequence type, the size of the delimiter is the length of the delimiter sequence.
+         */
+        [[nodiscard]] constexpr int length() const {
+            return static_cast<int>(m_sequence.size());
         }
 
     private:
-        const SequenceType& m_sequence;
+        const SequenceType& m_sequence; /**< The delimiter sequence. */
     };
 
     /**
-     * @brief
-     * @tparam SequenceType
+     * @brief Deduction guide for BySequence delimiter class.
+     */
+    template<typename T> BySequence(std::initializer_list<T>) -> BySequence<std::vector<T>>;
+
+    /**
+     * @brief Delimiter type for splitting container into sequences delimited by any of given set of elements.
+     * @tparam SequenceType The type of delimiter sequence.
      */
     template<typename SequenceType>
     class ByAnyElement
     {
     public:
+
+        /**
+         * @brief Constructor, taking a sequence of delimiter elements as parameter.
+         * @param sequence The sequence of elements to use as delimiters.
+         */
         explicit ByAnyElement(const SequenceType& sequence) : m_sequence(sequence) {
             static_assert(IsRandomAccessIterator<typename SequenceType::iterator>::value,
                           "Delimiter is not a sequence container!");
         }
 
+        /**
+         * @brief Method for finding the points at which to split the container.
+         * @tparam RandomAccessIter The type of container iterator.
+         * @param begin The begin iterator.
+         * @param end The end iterator.
+         * @return A std::vector with iterators one-past the place to split the container.
+         */
         template<typename RandomAccessIter>
-        auto Find(RandomAccessIter begin,
+        auto find(RandomAccessIter begin,
                   RandomAccessIter end) {
 
             std::vector<RandomAccessIter> locations;
@@ -558,38 +588,49 @@ namespace trl
             return locations;
         }
 
-        constexpr size_t Length() const {
+        /**
+         * @brief Return the size of the delimiter.
+         * @return For the ByAnyElement type, the size of the delimiter is always one.
+         */
+        [[nodiscard]] constexpr int length() const {
             return 1;
         }
 
     private:
-        const SequenceType& m_sequence;
+        const SequenceType& m_sequence; /**< The sequence of delimiter elements. */
     };
 
     /**
-     * @brief
+     * @brief Deduction guide for ByAnyElement delimiter class.
+     */
+    template<typename T> ByAnyElement(std::initializer_list<T>) -> ByAnyElement<std::vector<T>>;
+
+    /**
+     * @brief Delimiter type for splitting container into sequences of a certain length length.
      */
     class ByLength
     {
     public:
 
         /**
-         * @brief
-         * @param length
+         * @brief Constructor, taking the sequence length as parameter.
+         * @param length Maximum length of sequences.
          */
         explicit ByLength(std::ptrdiff_t length) : m_length(length) {}
 
         /**
-         * @brief
-         * @tparam RandomAccessIter
-         * @param begin
-         * @param end
-         * @return
+         * @brief Method for finding the points at which to split the container.
+         * @tparam RandomAccessIter The type of container iterator.
+         * @param begin The begin iterator.
+         * @param end The end iterator.
+         * @return A std::vector with iterators one-past the place to split the container.
          */
         template<typename RandomAccessIter>
-        auto Find(RandomAccessIter begin,
+        auto find(RandomAccessIter begin,
                   RandomAccessIter end) {
 
+            // ===== Iterate through the container to find the splitting locations.
+            // ===== The locations vector will store iterators to one-past each sequence to split off.
             std::vector<RandomAccessIter> locations;
             while (std::distance(begin, end) > m_length) {
                 std::advance(begin, m_length);
@@ -599,12 +640,16 @@ namespace trl
             return locations;
         }
 
-        constexpr size_t Length() const {
+        /**
+         * @brief Return the size of the delimiter.
+         * @return For the ByLength type, the size of the delimiter is always zero.
+         */
+        [[nodiscard]] constexpr int length() const {
             return 0;
         }
 
     private:
-        const std::ptrdiff_t m_length;
+        const std::ptrdiff_t m_length; //*< The size of the sequence to separate. */
     };
 
     /**
@@ -621,22 +666,24 @@ namespace trl
                OutputIt destination,
                DelimiterType delimiter) {
 
+        // ===== Check that the container to be split is a sequential container, i.e. supports random access, eg. std::vector
         static_assert(IsRandomAccessIterator<typename Container::iterator>::value,
                       "Input container is not sequential!");
 
-        auto locations = delimiter.Find(container.begin(), container.end());
+        // ===== Find the locations where the sequence should be split. Add the end() iterator as the last element.
+        auto locations = delimiter.find(container.begin(), container.end());
         *std::back_inserter(locations) = container.end();
 
-        auto first = container.begin();
-
+        // ===== Iterate through the container and split at the given locations. Insert the elements in the destination container.
+        auto      first = container.begin();
         for (auto last : locations) {
-            Container result; // TODO: This is ineffecient, but when creating Container in-place, the code won't compile.
+            Container result; // TODO(troldal): This is ineffecient, but when creating Container in-place, the code won't compile.
             std::copy(first, last, std::back_inserter(result));
             *(destination++) = result;
-            first = last + delimiter.Length();
+            first = last + delimiter.length();
         }
     }
 }  // namespace trl
 
 
-#endif //TROLDALGO
+#endif // TROLDALGO_HPP

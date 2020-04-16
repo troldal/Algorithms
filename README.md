@@ -33,7 +33,9 @@ The generic algorithms are simple, general-purpose algorithms that have been dev
 ### trl::find_first_not_of
 
 ### trl::find_all
-The trl::find_all algorithm finds elements with a certain value in a container.
+The trl::find_all algorithm finds all elements with a certain value in a container. It takes a begin/end iterator pair for the container, an output iterator to the destination container and the value to find. The destination must hold iterators to the elements in the container.
+
+Example code:
 
 ```cpp
 #include <iostream>
@@ -64,7 +66,11 @@ int main() {
 ```
 
 ### trl::find_all_if
+The trl::find_all_if algorithm finds all elements matching a predicate in a container. It takes a begin/end iterator pair for the container, an output iterator to the destination container and the value to find. The destination must hold iterators to the elements in the container.
 
+The predicate function takes an argument (possibly as const reference) of the container value type. The predicate function returns true for those elements that should be added to the destination.
+
+Example code:
 ```cpp
 #include <iostream>
 #include <vector>
@@ -92,7 +98,11 @@ int main() {
 ```
 
 ### trl::find_all_if_not
+The trl::find_all_if_not algorithm finds all elements matching a predicate in a container. It takes a begin/end iterator pair for the container, an output iterator to the destination container and the value to find. The destination must hold iterators to the elements in the container.
 
+The predicate function takes an argument (possibly as const reference) of the container value type. The predicate function returns true for those elements that should NOT be added to the destination.
+
+Example code:
 ```cpp
 #include <iostream>
 #include <vector>
@@ -119,7 +129,9 @@ int main() {
 ```
 
 ### trl::find_all_of
+The trl::find_all_of algorithm finds all elements matching any of a set of given elements. It takes a begin/end iterator pair for the container, , b begin/end iterator pair to the collection of elements to find, and an output iterator to the destination container. The destination must hold iterators to the elements in the container.
 
+Example code:
 ```cpp
 #include <iostream>
 #include <vector>

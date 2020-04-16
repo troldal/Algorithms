@@ -2,9 +2,13 @@
   <profile version="1.0">
     <option name="myName" value="Project Default" />
     <inspection_tool class="ClangTidy" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="clangTidyChecks" value="*,-fuchsia-default-arguments-calls,-readability-else-after-return,-readability-function-size,-readability-named-parameter,-google-readability-braces-around-statements,-google-readability-function-size,-google-default-arguments,-readability-braces-around-statements,-hicpp-braces-around-statements,-modernize-use-trailing-return-type" />
+      <option name="clangTidyChecks" value="*,-fuchsia-default-arguments-calls,-readability-else-after-return,-readability-function-size,-readability-named-parameter,-google-readability-braces-around-statements,-google-readability-function-size,-google-default-arguments,-readability-braces-around-statements,-hicpp-braces-around-statements,-modernize-use-trailing-return-type,-fuchsia-trailing-return,-readability-convert-member-functions-to-static" />
       <option name="preferClangTidyFilesOverIDESettings" value="false" />
     </inspection_tool>
-    <inspection_tool class="OCInconsistentNaming" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="SpellCheckingInspection" enabled="false" level="TYPO" enabled_by_default="false">
+      <option name="processCode" value="true" />
+      <option name="processLiterals" value="true" />
+      <option name="processComments" value="true" />
+    </inspection_tool>
   </profile>
 </component>

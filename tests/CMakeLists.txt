@@ -2,14 +2,16 @@
 # Define CATCH library target
 #=======================================================================================================================
 add_library(Catch INTERFACE)
-target_include_directories(Catch SYSTEM INTERFACE ${CMAKE_CURRENT_LIST_DIR}/catch2)
+target_sources(Catch INTERFACE ${CMAKE_CURRENT_LIST_DIR}/catch2/catch.hpp)
+target_include_directories(Catch SYSTEM INTERFACE ${CMAKE_CURRENT_LIST_DIR}/catch2/)
 
 #=======================================================================================================================
 # Define TEST target
 #=======================================================================================================================
 add_executable(TroldalgoTestSuite "")
 target_sources(TroldalgoTestSuite PRIVATE main.cpp)
-target_link_libraries(TroldalgoTestSuite PRIVATE ${TBB_LIBRARIES} Catch Troldalgo)
+target_link_libraries(TroldalgoTestSuite PRIVATE Catch)
+target_link_libraries(TroldalgoTestSuite PUBLIC Troldalgo)
 
 #=======================================================================================================================
 # Set warning flags

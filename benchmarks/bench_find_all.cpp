@@ -4,7 +4,6 @@
 
 #include <random>
 #include <vector>
-#include <execution>
 #include <benchmark/benchmark.h>
 #include <troldalgo.hpp>
 
