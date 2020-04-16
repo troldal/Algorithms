@@ -33,16 +33,6 @@ SOFTWARE.
 #ifndef TROLDALGO_HPP
 #define TROLDALGO_HPP
 
-#include <algorithm>
-#include <functional>
-#include <future>
-#include <iostream>
-#include <iterator>
-#include <list>
-#include <queue>
-#include <thread>
-#include <vector>
-
 namespace trl
 {
 
