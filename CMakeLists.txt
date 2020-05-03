@@ -31,7 +31,6 @@ set(IGNORE_ME ${CMAKE_C_COMPILER})
 option(CREATE_DOCS "Build library documentation (requires Doxygen and Graphviz/Dot to be installed)" ON)
 option(BUILD_SAMPLES "Build sample programs" ON)
 option(BUILD_TESTS "Build and run library tests" ON)
-option(BUILD_BENCHMARKS "Build library benchmarks" ON)
 
 #=======================================================================================================================
 # Add project subdirectories
@@ -48,8 +47,4 @@ endif ()
 
 if (${BUILD_SAMPLES})
     add_subdirectory(examples)
-endif ()
-
-if (${BUILD_BENCHMARKS})
-    add_subdirectory(benchmarks)
 endif ()
