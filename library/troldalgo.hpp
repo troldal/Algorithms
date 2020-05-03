@@ -33,6 +33,8 @@ SOFTWARE.
 #ifndef TROLDALGO_HPP
 #define TROLDALGO_HPP
 
+#include <algorithm>
+
 namespace trl
 {
 

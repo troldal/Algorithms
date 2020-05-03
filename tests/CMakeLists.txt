@@ -68,7 +68,7 @@ endif ()
 #=======================================================================================================================
 # Enable code coverage
 #=======================================================================================================================
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND NOT WIN32)
     target_compile_options(TroldalgoTestSuite PRIVATE -fprofile-instr-generate -fcoverage-mapping)
     target_link_options(TroldalgoTestSuite PRIVATE -fprofile-instr-generate)
     #Uncomment in case of linker errors
