@@ -1,23 +1,18 @@
 #=======================================================================================================================
-# Define Example1 target
+# Define example_find_all target
 #=======================================================================================================================
 add_executable(example_find_all example_find_all.cpp)
 target_link_libraries(example_find_all PRIVATE Troldalgo)
 
 #=======================================================================================================================
-# Define Example2 target
+# Define example_search_all target
 #=======================================================================================================================
-add_executable(Example2 Example2.cpp)
-target_link_libraries(Example2 PRIVATE Troldalgo)
+add_executable(example_search_all example_search_all.cpp)
+target_link_libraries(example_search_all PRIVATE Troldalgo)
 
 #=======================================================================================================================
-# Define Example3 target
+# Define example_split target
 #=======================================================================================================================
-add_executable(Example3 Example3.cpp)
-target_link_libraries(Example3 PRIVATE Troldalgo)
+add_executable(example_split example_split.cpp)
+target_link_libraries(example_split PRIVATE Troldalgo)
 
-#=======================================================================================================================
-# Define Example3 target
-#=======================================================================================================================
-add_executable(Example4 Example4.cpp)
-target_link_libraries(Example4 PRIVATE Troldalgo)

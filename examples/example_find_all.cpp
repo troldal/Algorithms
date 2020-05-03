@@ -33,22 +33,44 @@ int main() {
     std::cout << "trl::find_all_of example:" << std::endl;
     std::cout << "========================================" << std::endl;
     example_find_all_of();
+    std::cout << std::endl;
+
+    std::cout << "trl::find_all_of example:" << std::endl;
+    std::cout << "========================================" << std::endl;
+    example_find_all_of_with_pred();
+    std::cout << std::endl;
+
+    std::cout << "trl::find_all_of example:" << std::endl;
+    std::cout << "========================================" << std::endl;
+    example_find_all_not_of();
+    std::cout << std::endl;
+
+    std::cout << "trl::find_all_of example:" << std::endl;
+    std::cout << "========================================" << std::endl;
+    example_find_all_not_of_with_pred();
 
     return 0;
 }
 
 void example_find_all() {
 
+    // ===== Initiate source string.
     std::string src = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    // ===== initiate string to search, and append 1000000 copies of the source string
     std::string str;
-    auto itr = std::back_inserter(str);
+    auto        itr = std::back_inserter(str);
 
     for (auto i = 0; i < 1000000; ++i)
         std::copy(src.begin(), src.end(), itr);
 
+    // ===== Create a vector to hold the results (iterators to the found elements)
     std::vector<decltype(str.begin())> results;
+
+    // ===== Find all occurences of the character 'Z' and add iterators to those elements to the results vector.
     trl::find_all(str.begin(), str.end(), std::back_inserter(results), 'Z');
 
+    // ===== Print results
     std::cout << "Size of string: " << str.size() << std::endl;
     std::cout << "Number of Z's found: " << results.size() << std::endl;
     std::cout << "Character at index 0: " << *results[0] << std::endl;
@@ -109,4 +131,16 @@ void example_find_all_of() {
     std::cout << "Character at index 1: " << *results[1] << std::endl;
     std::cout << "Character at index 2: " << *results[2] << std::endl;
     std::cout << "Character at index 3: " << *results[3] << std::endl;
+}
+
+void example_find_all_of_with_pred() {
+    //TODO: To be implemented
+}
+
+void example_find_all_not_of() {
+    //TODO: To be implemented
+}
+
+void example_find_all_not_of_with_pred() {
+    //TODO: To be implemented
 }
