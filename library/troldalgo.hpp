@@ -672,7 +672,10 @@ namespace trl
             Container result; // TODO(troldal): This is ineffecient, but when creating Container in-place, the code won't compile.
             std::copy(first, last, std::back_inserter(result));
             *(destination++) = result;
-            first = last + delimiter.length();
+            if (std::distance(last, container.end()) >= delimiter.length())
+                first = last + delimiter.length();
+            else
+                first = container.end();
         }
     }
 }  // namespace trl
