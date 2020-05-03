@@ -61,7 +61,7 @@ void example_find_all() {
     std::string str;
     auto        itr = std::back_inserter(str);
 
-    for (auto i = 0; i < 100; ++i)
+    for (auto i = 0; i < 1000000; ++i)
         std::copy(src.begin(), src.end(), itr);
 
     // ===== Create a vector to hold the results (iterators to the found elements)
@@ -82,7 +82,7 @@ void example_find_all_if() {
     std::string str;
     auto itr = std::back_inserter(str);
 
-    for (auto i = 0; i < 100; ++i)
+    for (auto i = 0; i < 1000000; ++i)
         std::copy(src.begin(), src.end(), itr);
 
     std::vector<decltype(str.begin())> results;
@@ -100,7 +100,7 @@ void example_find_all_if_not() {
     std::string str;
     auto itr = std::back_inserter(str);
 
-    for (auto i = 0; i < 100; ++i)
+    for (auto i = 0; i < 1000000; ++i)
         std::copy(src.begin(), src.end(), itr);
 
     std::vector<decltype(str.begin())> results;
@@ -118,7 +118,7 @@ void example_find_all_of() {
     std::string str;
     auto itr = std::back_inserter(str);
 
-    for (auto i = 0; i < 100; ++i)
+    for (auto i = 0; i < 1000000; ++i)
         std::copy(src.begin(), src.end(), itr);
 
     std::string s = "AGQX";
